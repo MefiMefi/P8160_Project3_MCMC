@@ -1,0 +1,84 @@
+---
+title: "derive posterior distribution"
+author: "Renjie Wei"
+date: '2022-05-02'
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+The suggested Bayesian model 
+
+$$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
+\beta_{3,i}\Delta_{i,2}(t) +\beta_{4,i}\Delta_{i,3}(t)  + \epsilon_{i}(t)$$  
+
+where $Y_{i}(t)$ the wind speed at time $t$ (i.e. 6 hours earlier),  $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ and $\Delta_{i,3}(t)$ are the changes of latitude, longitude and wind speed between $t$ and $t+6$, and $\epsilon_{i,t}$ follows a  normal distributions with mean zero and variance $\sigma^2$, independent across $t$. 
+
+In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{7,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
+
+$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\beta}, \boldsymbol{\Sigma})$$
+
+follows a multivariate normal distributions with mean $\boldsymbol{\beta}$ and covariance matrix $\Sigma$.
+
+We assume the following non-informative or weak prior distributions for $\sigma^2$, $\boldsymbol{\beta}$ and $\Sigma$.
+
+$$P(\sigma^2) \propto \frac{1}{\sigma^2};\quad P(\boldsymbol{\beta})\propto 1;\quad P(\Sigma^{-1}) \propto 
+|\Sigma|^{-(d+1)} \exp(-\frac{1}{2}\Sigma^{-1})$$
+
+$d$ is dimension of $\beta$.
+
+\newpage
+
+## 1
+Let $\textbf{B} = (\boldsymbol{\beta}_1^\top,..., \boldsymbol{\beta}_n^\top)^\top$, derive the posterior distribution of the parameters $\Theta = (\textbf{B}^\top, \boldsymbol{\beta}^\top, \sigma^2, \Sigma)$.
+
+Note from given Bayesian model, let
+
+$$\epsilon_i(t) = Y_i(t+6) - \Big(\beta_{0,i} + \beta_{1,i}Y_i(t) + \beta_{2,i}\Delta_{i,1}(t) + \beta_{3,i}\Delta_{i,2}(t) + \beta_{4,i}\Delta_{i,3}(t)\Big) \stackrel{i.i.d}{\sim} N(0, \sigma^2)$$
+$$\text{or}$$
+$$Y_i(t+6) {\sim} N(\boldsymbol{X}_i(t)\boldsymbol{\beta}_i^\top, \sigma^2)$$
+where $\boldsymbol{X}_i(t) = (1, Y_i(t), \Delta_{i,1}(t), \Delta_{i,2}(t), \Delta_{i,3}(t))$, and $\boldsymbol{\beta}_i = (\beta_{0,i}, \beta_{1,i}, \beta_{2,i}, \beta_{3,i}, \beta_{4,i})$. Therefore, the wind speed of $i^{th}$ hurricane at time $t$ follows the normal distribution with the pdf below
+
+$$f_{Y_i(t+6)}(y_i(t+6) \mid \boldsymbol{X}_i(t), \boldsymbol{\beta}_i,  \sigma^2) = \frac{1}{\sqrt{2\pi}\sigma} \exp\Big\{-\frac{1}{2\sigma^2}\Big(y_i(t+6) - \boldsymbol{X}_i(t)\boldsymbol{\beta}_i^\top\Big)^2 \Big\}$$
+Therefore, the conditional distribution of $Y_i$, the wind speed of $i^{th}$ hurricane follows the multivariate normal distribution below
+
+$$(\boldsymbol{Y}_i \mid \boldsymbol{X}_i, \boldsymbol{\beta}_i, \sigma^2) \sim \mathcal{N}(\boldsymbol{X}_i\boldsymbol{\beta}_i^\top, \sigma^2 I)$$
+
+where $Y_i$ is an $m_i$-dimensional vector and $\boldsymbol{X}_i$ is a $m_i \times d$ matrix.
+
+Hence, the joint likelihood function of all $i's$ hurricanes can be expresses as
+$$L_{Y}(\textbf{B},  \sigma^2 ) = \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}$$
+
+where $I$ is an identical matrix with dimension consistent with $Y_i$.
+
+From Bayesian theorem, the posterior distribution for $\Theta$ is
+
+$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \boldsymbol{\Sigma} \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B},  \sigma^2 ) \times \pi(\textbf{B} \mid \boldsymbol{\beta}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\beta}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
+
+where $\pi(\textbf{B} \mid \boldsymbol{\beta},  \Sigma)$ is the joint multivariate normal density of $\beta$, since
+$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\beta}, \boldsymbol{\Sigma})$$
+
+Therefore
+$$\pi(\textbf{B} \mid \boldsymbol{\beta},  \boldsymbol{\Sigma}) = \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top) \Big\}.$$
+
+So we have the following posterior distribution:
+
+$$\pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \boldsymbol{\Sigma} \mid Y) \propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\}\\$$
+$$\times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times |\boldsymbol{\boldsymbol{\Sigma}}|^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}.$$
+
+By rearranging
+$$\pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \boldsymbol{\Sigma} \mid Y) \propto 
+\frac{1}{\sigma^2} 
+\times \prod_{i=1}^n (2\pi\sigma^2)^{-m_i/2} 
+\times | \boldsymbol{\Sigma} |^{-(d + 1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
+\times \det(2\pi\boldsymbol{\Sigma})^{-n/2} \\$$
+
+$$\times \prod_{i=1}^n \Big\{\exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\}
+\times \prod_{i=1}^n \Big\{\exp \big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta})\Sigma^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top\big\} \Big\}.$$
+
+
+For a given $Y_i$,
+$$\log{\pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \Sigma \mid Y_i)} \propto \sum_{i=1}^n -\frac{1}{2}\log2\pi - \log \sigma - \frac{1}{2\sigma^2}\Big(Y_i(t + 6) - \mu_i \Big)^2 +$$
+$$\sum_{i=1}^n -\frac{1}{2}\log(\det(2\pi\Sigma)) - \frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top \Sigma^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta}) - 2\log\sigma - (d+1)\log|\Sigma| - \frac{1}{2}\Sigma^{-1}.$$
