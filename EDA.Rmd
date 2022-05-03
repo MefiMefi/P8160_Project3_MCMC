@@ -29,18 +29,6 @@ dt_long <- dt %>%
 ```
 
 ```{r}
-# Season and count
-storms_season_name = distinct(group_by(select(dt_long, Season, ID), Season))
-ggplot(data = storms_season_name) + 
-  geom_bar(aes(x = Season))
-
-storms_season_name %>% 
-  dplyr::group_by(Season) %>% 
-  mutate(count = n()) %>% 
-  ggplot(aes(x = Season, y = count)) +
-  geom_point() +
-  geom_smooth(method = "loess")
-
 # Month and count
 month = c("January", "April", "May", "June", "July", "August", "September", "October", "November", "December")
 
@@ -48,13 +36,46 @@ storms_month_name = distinct(group_by(select(dt_long, Month, ID), Month))
 
 storms_month_name %>% 
   dplyr::group_by(Month) %>% 
-  mutate(count = n(),
-         Month =  factor(Month, levels = month)) %>% 
+  mutate(Month =  factor(Month, levels = month)) %>% 
   arrange(Month) %>% 
-  ggplot(aes(x = Month, y = count)) +
-  geom_point() +
-  geom_smooth()
+  ggplot(aes(x = Month)) +
+  geom_bar()
 
+dt_long %>% 
+  dplyr::group_by(Month) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Month, avg_speed) %>% 
+  mutate(Month =  factor(Month, levels = month)) %>% 
+  arrange(Month) %>% 
+  ggplot(aes(x = Month, y = avg_speed)) +
+  geom_point()
+
+
+# Season and count
+storms_season_name = distinct(group_by(select(dt_long, Season, ID), Season))
+ggplot(data = storms_season_name) + 
+  geom_bar(aes(x = Season))
+
+dt_long %>% 
+  dplyr::group_by(Season) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Season, avg_speed) %>% 
+  ggplot(aes(x = Season, y = avg_speed)) +
+  geom_point() +
+  geom_smooth(method = "loess")
+
+
+# Nature and count
+storms_nature_name = distinct(group_by(select(dt_long, Nature, ID), Nature))
+ggplot(data = storms_nature_name) + 
+  geom_bar(aes(x = Nature))
+
+dt_long %>% 
+  dplyr::group_by(Nature) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Nature, avg_speed) %>% 
+  ggplot(aes(x = Nature, y = avg_speed)) +
+  geom_point()
 ```
 
 
