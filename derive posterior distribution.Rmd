@@ -18,13 +18,13 @@ where $Y_{i}(t)$ the wind speed at time $t$ (i.e. 6 hours earlier),  $\Delta_{i,
 
 In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{7,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
 
-$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\beta}, \boldsymbol{\Sigma})$$
+$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
 
-follows a multivariate normal distributions with mean $\boldsymbol{\beta}$ and covariance matrix $\Sigma$.
+follows a multivariate normal distributions with mean $\boldsymbol{\mu}$ and covariance matrix $\Sigma$.
 
 We assume the following non-informative or weak prior distributions for $\sigma^2$, $\boldsymbol{\beta}$ and $\Sigma$.
 
-$$P(\sigma^2) \propto \frac{1}{\sigma^2};\quad P(\boldsymbol{\beta})\propto 1;\quad P(\Sigma^{-1}) \propto 
+$$P(\sigma^2) \propto \frac{1}{\sigma^2};\quad P(\boldsymbol{\mu})\propto 1;\quad P(\Sigma^{-1}) \propto 
 |\Sigma|^{-(d+1)} \exp(-\frac{1}{2}\Sigma^{-1})$$
 
 $d$ is dimension of $\beta$.
@@ -32,7 +32,7 @@ $d$ is dimension of $\beta$.
 \newpage
 
 ## 1
-Let $\textbf{B} = (\boldsymbol{\beta}_1^\top,..., \boldsymbol{\beta}_n^\top)^\top$, derive the posterior distribution of the parameters $\Theta = (\textbf{B}^\top, \boldsymbol{\beta}^\top, \sigma^2, \Sigma)$.
+Let $\textbf{B} = (\boldsymbol{\beta}_1^\top,..., \boldsymbol{\beta}_n^\top)^\top$, derive the posterior distribution of the parameters $\Theta = (\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma)$.
 
 Note from given Bayesian model, let
 
@@ -55,21 +55,71 @@ where $I$ is an identical matrix with dimension consistent with $Y_i$.
 
 From Bayesian theorem, the posterior distribution for $\Theta$ is
 
-$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \boldsymbol{\Sigma} \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B},  \sigma^2 ) \times \pi(\textbf{B} \mid \boldsymbol{\beta}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\beta}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
+$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B},  \sigma^2 ) \times \pi(\textbf{B} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\mu}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
 
 where $\pi(\textbf{B} \mid \boldsymbol{\beta},  \Sigma)$ is the joint multivariate normal density of $\beta$, since
-$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\beta}, \boldsymbol{\Sigma})$$
+$$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
 
 Therefore
-$$\pi(\textbf{B} \mid \boldsymbol{\beta},  \boldsymbol{\Sigma}) = \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top) \Big\}.$$
+$$\pi(\textbf{B} \mid \boldsymbol{\mu},  \boldsymbol{\Sigma}) = \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\}.$$
 
 So we have the following posterior distribution:
 
 $$
 \begin{aligned}
-\pi(\textbf{B}, \boldsymbol{\beta}, \sigma^2, \boldsymbol{\Sigma} \mid Y) &\propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\} \\ 
-& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\beta}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\beta})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times |\boldsymbol{\boldsymbol{\Sigma}}|^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
+\pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma\mid Y) &\propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\} \\ 
+& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
 \end{aligned}
 $$
 
+```{r loglik_functions}
+# betavec: 1*5
+# B:n*5
+# sigma2: 1*1
+# mu: 1*5
+# Sigma: 5*5
+
+# d = 5
+# n = 702
+
+
+loglik_sigma2 <- function(sigma2){
+    if (sigma2 <= 0) {
+        return(-Inf)
+    } else {
+        return(log(1/sigma2^2))  
+    }
+    
+}
+
+loglik_Sigma <- function(Sigma, d){
+    if (min(eigen(Sigma)$values) <= 0) {
+        return(-Inf)
+    } else {
+        loglik = log(det(Sigma)^(-(d+1))*exp(-(1/2)*solve(Sigma)))
+        return(loglik)
+    }
+}
+
+# log likelihood for y given a specific hurricane's data given sigma2 and betavec
+loglik_Y <- function(y, X, betavec, sigma2){
+    m = length(y)
+    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) * solve(diag(sigma2, m)) * (X %*% t(betavec))) 
+    loglik = log(loglik)
+    return(loglik)
+    
+}
+
+# log likelihood for betavec given a specific hurricane's mu and Sigma
+
+loglik_betavec <- function(betavec, mu, Sigma){
+    if (min(eigen(Sigma)$values) <= 0) {
+        return(-Inf)
+    } else {
+        loglik = log(det(2*pi*Sigma)^(-(1/2))*exp(-(1/2)*(betavec - mu) %*% solve(Sigma) %*% t(betavec - mu)))
+        return(loglik)
+    }
+}
+
+```
 
