@@ -23,8 +23,11 @@ summary(dt)
 library(tidyverse)
 dt_long <- dt %>%
   dplyr::group_by(ID) %>% 
-  mutate(Lat_change = Latitude - lag(Latitude),
+  mutate(Wind_prev = lag(Wind.kt),
+         Lat_change = Latitude - lag(Latitude),
          Long_change = Longitude - lag(Longitude),
-         Wind_change = Wind.kt - lag(Wind.kt))
+         Wind_change = Wind.kt - lag(Wind.kt)
+         )
+
 ```
 
