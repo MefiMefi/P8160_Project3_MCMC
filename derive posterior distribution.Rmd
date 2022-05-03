@@ -74,7 +74,6 @@ $$
 
 ```{r loglik_functions}
 # betavec: 1*5
-# B:n*5
 # sigma2: 1*1
 # mu: 1*5
 # Sigma: 5*5
@@ -104,7 +103,7 @@ loglik_Sigma <- function(Sigma, d){
 # log likelihood for y given a specific hurricane's data given sigma2 and betavec
 loglik_Y <- function(y, X, betavec, sigma2){
     m = length(y)
-    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) * solve(diag(sigma2, m)) * (X %*% t(betavec))) 
+    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) %*% solve(diag(sigma2, m)) %*% (X %*% t(betavec))) 
     loglik = log(loglik)
     return(loglik)
     
@@ -120,6 +119,33 @@ loglik_betavec <- function(betavec, mu, Sigma){
         return(loglik)
     }
 }
+
+```
+
+
+
+```{r}
+library(tidyverse)
+load("./dt_long.RData")
+dt_windspe <- dt_long %>% select(c("ID", "Wind.kt", "Wind_prev", "Lat_change", "Long_change", "Wind_change")) %>% drop_na()
+
+IDs <- unique(dt_windspe$ID)
+
+length(IDs)
+
+nrow(dt_windspe[which(dt_windspe$ID == IDs[1]),])
+
+dt_mtx <- NULL
+
+for(i in 1:length(IDs)){
+    dt_i = dt_windspe[which(dt_windspe$ID == IDs[i]),]
+    y = dt_i$Wind.kt
+    X = dt_i[3:6]
+    X = data.matrix(X)
+    dt = list(y = y, X = X)
+}
+
+
 
 ```
 
