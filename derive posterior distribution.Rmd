@@ -81,7 +81,7 @@ $$
 \begin{aligned}
 \pi(\textbf{B} | .) &\propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\textbf{B}
 \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\\
-& \propto \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\} \\
+& \propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\} \\
 & \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\} \\
 & \propto \prod_{i=1}^n\exp\{-\frac{1}{2}\Big((\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)+(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top)\Big)\}
 \end{aligned}
@@ -110,7 +110,24 @@ Hence, each $\boldsymbol{\beta}_i$ has a conditional posterior multivariate norm
 
 $$\pi(\boldsymbol{\beta}_i | .)\sim N(\boldsymbol{V}^{-1}\boldsymbol{M}, \boldsymbol{V}^{-1})$$
 
-2. For $\pi(\boldsymbol{\mu}| .)$
+2. For $\pi(\sigma^2| .)$
+
+\begin{align*}
+\pi(\sigma^2| .) & \propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\boldsymbol{\sigma}^2) \\
+& \propto \frac{1}{\sigma^2} \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}\\
+& \propto {\frac{1}{\sigma^2}}^(\frac{\sum\limits_{i=1}^{n} m_i}{2}+1) \exp\{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top) \}
+\end{align*}
+
+which follows the form of pdf of inverse gamma distribution
+
+$$
+f(x;\alpha,\beta) = \frac{\beta^{\alpha}}{\Gamma(\alpha)}\frac{1}{x}\exp\{-\frac{\beta}{x}\}
+$$
+in this case, $x$ is replaced by $\sigma^2$, $\alpha$ is replaced by $\frac{1}{2}\sum\limits_{i=1}^{n} m_i$, $\beta$ is replaced by $\frac{1}{2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)$ 
+
+i.e.
+
+$$\pi(\sigma^2| .)\sim IG(\frac{1}{2}\sum\limits_{i=1}^{n} m_i,\frac{1}{2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top))$$
 
 
 ```{r loglik_functions}
