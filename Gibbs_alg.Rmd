@@ -1,0 +1,79 @@
+---
+title: "Gibbs_alg"
+author: "Renjie Wei"
+date: '2022-05-04'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+load("./dt_long.RData")
+dt <-
+  dt_long %>% 
+    mutate(intercept = 1) %>% 
+    select(c("ID", "Wind.kt", "intercept", "Wind_prev", "Lat_change", "Long_change", "Wind_change")) %>% 
+    drop_na()
+
+IDs <- unique(dt$ID)
+
+dt_mtx <- list(NULL)
+
+ID_in <- NULL
+for (i in 1:length(IDs)) {
+    dt_temp =  dt[which(dt$ID == IDs[i]),][,2:7]
+    m = nrow(dt_temp)
+    # need to drop observations less than 5
+    if (m <= 5){
+        next
+    }else{
+        ID_in = c(ID_in,  IDs[i])
+    }
+}
+
+for (i in 1:length(ID_in)) {
+    dt_temp = dt[which(dt$ID == ID_in[i]),][,2:7]
+    dt_temp = dt_temp %>% as.matrix()
+    dt_mtx[[i]] = dt_temp
+}
+```
+
+```{r gibbs_sampling}
+library(MASS)
+library(tidyverse)
+library(extraDistr)
+library(matrixsampling)
+library(parallel)
+library(foreach)
+library(doParallel)
+
+# posterior of B
+# each beta_i 1*5
+# B n*5
+
+post.B <- function(dt, muvec, sigma2, Sigma){
+   n = length(dt)
+   res = list(NULL)
+   for (i in 1:n){
+       # stuffs to define the distribution
+       X = as.matrix(dt[[i]][,-1]) 
+       y = as.vector(dt[[i]][,1])
+       V = sigma2^(-1) * t(X) %*% X + solve(Sigma)
+       M = sigma2^(-1) * t(y) %*% X + muvec %*% solve(Sigma)
+       mean_bi = solve(V) %*% t(M) # we need a 5*1
+       vcov_bi = solve(V)
+       bi = mvrnorm(1, mu = mean_bi, Sigma = vcov_bi)
+       res[[i]] = list(bi = bi)
+       
+   }
+   return(res)
+}
+
+# test passed
+# post.B(dt = dt_mtx, muvec = rep(0,5), sigma2 = 2, Sigma = diag(2,5,5))
+
+post.sigma <- function()
+```
