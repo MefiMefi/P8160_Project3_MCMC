@@ -16,7 +16,7 @@ $$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
 
 where $Y_{i}(t)$ the wind speed at time $t$ (i.e. 6 hours earlier),  $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ and $\Delta_{i,3}(t)$ are the changes of latitude, longitude and wind speed between $t$ and $t+6$, and $\epsilon_{i,t}$ follows a  normal distributions with mean zero and variance $\sigma^2$, independent across $t$. 
 
-In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{7,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
+In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{5,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
 
 $$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
 
@@ -49,13 +49,14 @@ $$(\boldsymbol{Y}_i \mid \boldsymbol{X}_i, \boldsymbol{\beta}_i, \sigma^2) \sim 
 where $Y_i$ is an $m_i$-dimensional vector and $\boldsymbol{X}_i$ is a $m_i \times d$ matrix.
 
 Hence, the joint likelihood function of all $i's$ hurricanes can be expresses as
-$$L_{Y}(\textbf{B},  \sigma^2 ) = \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}$$
+$$L_{Y}(\textbf{B}^\top,  \sigma^2 ) = \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}$$
 
 where $I$ is an identical matrix with dimension consistent with $Y_i$.
 
 From Bayesian theorem, the posterior distribution for $\Theta$ is
 
-$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B},  \sigma^2 ) \times \pi(\textbf{B} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\mu}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
+$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\textbf{B}
+\mid \boldsymbol{\mu}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\mu}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
 
 where $\pi(\textbf{B} \mid \boldsymbol{\beta},  \Sigma)$ is the joint multivariate normal density of $\beta$, since
 $$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
@@ -71,6 +72,40 @@ $$
 & \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
 \end{aligned}
 $$
+
+To apply MCMC, we need to find conditional posterior distribution of each parameter.
+
+1. For $\pi(\textbf{B} \mid .)$
+
+$$
+\begin{aligned}
+\pi(\textbf{B} \mid .) &\propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\textbf{B}
+\mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\\
+& \propto \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\} \\
+& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\} \\
+& \propto \prod_{i=1}^n\exp\{-\frac{1}{2}\Big((\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)+(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top)\Big)\}
+\end{aligned}
+$$
+
+Considering the exponential term in each component in the product,
+
+$$\begin{aligned} &(\boldsymbol{Y}_i-\boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i-\boldsymbol{X}_i\boldsymbol{\beta}_i^\top) + (\boldsymbol{\beta}_i -\boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i-\boldsymbol{\mu})^\top) \\
+& = \boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{Y}_i +\boldsymbol{\beta}_i\boldsymbol{X}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i\boldsymbol{\beta}_i^\top - 2\boldsymbol{Y}_i(\sigma^2 I)^{-1}\boldsymbol{X}_i\boldsymbol{\beta}_i^\top \\
+&+ \boldsymbol{\beta}_i\boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top+\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top - 2\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top \\ 
+& = \boldsymbol{\beta}_i\boldsymbol{V}\boldsymbol{\beta}_i^\top-2\boldsymbol{M}\boldsymbol{\beta}_i^\top+\boldsymbol{R}\end{aligned}$$
+
+
+where,
+
+\begin{align*}
+    \boldsymbol{V} & = \boldsymbol{\Sigma}^{-1} + \boldsymbol{X}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i \\
+    \boldsymbol{M} & = \boldsymbol Y_i(\sigma^2 I)^{-1}\boldsymbol{X}_i+\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1} \\
+    \boldsymbol{R} & = \boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{Y}_i +\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top
+\end{align*}
+
+re-writing the conditional posterior distribution,
+
+$$\pi(\textbf{B} \mid .)\propto $$
 
 ```{r loglik_functions}
 # betavec: 1*5
@@ -123,29 +158,4 @@ loglik_betavec <- function(betavec, mu, Sigma){
 ```
 
 
-
-```{r}
-library(tidyverse)
-load("./dt_long.RData")
-dt_windspe <- dt_long %>% select(c("ID", "Wind.kt", "Wind_prev", "Lat_change", "Long_change", "Wind_change")) %>% drop_na()
-
-IDs <- unique(dt_windspe$ID)
-
-length(IDs)
-
-nrow(dt_windspe[which(dt_windspe$ID == IDs[1]),])
-
-dt_mtx <- NULL
-
-for(i in 1:length(IDs)){
-    dt_i = dt_windspe[which(dt_windspe$ID == IDs[i]),]
-    y = dt_i$Wind.kt
-    X = dt_i[3:6]
-    X = data.matrix(X)
-    dt = list(y = y, X = X)
-}
-
-
-
-```
 
