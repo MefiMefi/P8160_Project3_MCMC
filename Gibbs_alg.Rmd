@@ -176,9 +176,8 @@ test.MCMC.res = MCMC.Gibbs(dt_mtx, init.muvec = c(1,2,3,4,5), init.sigma2 = 1, i
 
 ```
 
-```{r extract_B}
-test.MCMC.B = matrix(unlist(test.MCMC.res$B),ncol = 5)
-
-
+```{r run_MCMC, cache=T}
+MCMC.res = MCMC.Gibbs(dt_mtx, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
+save(MCMC.res,file = "MCMC.res.RData")
 ```
 
