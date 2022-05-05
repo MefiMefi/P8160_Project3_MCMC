@@ -158,6 +158,7 @@ Build a model that combines those information and the estimated coefficients fro
 
 4. Write a report of your findings.
 
+<<<<<<< HEAD
 ```{r}
 library(tidyverse)
 dt %>%
@@ -166,3 +167,6 @@ dt %>%
          Long_change = Longitude - lag(Longitude),
          Wind_change = Wind.kt - lag(Wind.kt))
 ```
+=======
+
+>>>>>>> c942aa9a293ba1fefe9b212d4855b9bb6c1e36ce

@@ -16,7 +16,7 @@ $$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
 
 where $Y_{i}(t)$ the wind speed at time $t$ (i.e. 6 hours earlier),  $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ and $\Delta_{i,3}(t)$ are the changes of latitude, longitude and wind speed between $t$ and $t+6$, and $\epsilon_{i,t}$ follows a  normal distributions with mean zero and variance $\sigma^2$, independent across $t$. 
 
-In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{7,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
+In the model,  $\boldsymbol{\beta}_{i} =  (\beta_{0,i},\beta_{1,i},...,\beta_{5,i})$ are the random coefficients associated the $i$th hurricane, we assume that 
 
 $$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
 
@@ -31,39 +31,68 @@ $d$ is dimension of $\beta$.
 
 \newpage
 
-## 1
+## Posterior Distributions
+
 Let $\textbf{B} = (\boldsymbol{\beta}_1^\top,..., \boldsymbol{\beta}_n^\top)^\top$, derive the posterior distribution of the parameters $\Theta = (\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma)$.
 
-Note from given Bayesian model, let
+Let
 
-$$\epsilon_i(t) = Y_i(t+6) - \Big(\beta_{0,i} + \beta_{1,i}Y_i(t) + \beta_{2,i}\Delta_{i,1}(t) + \beta_{3,i}\Delta_{i,2}(t) + \beta_{4,i}\Delta_{i,3}(t)\Big) \stackrel{i.i.d}{\sim} N(0, \sigma^2)$$
-$$\text{or}$$
+$$\boldsymbol{X}_i(t)\boldsymbol{\beta}_i^\top = \beta_{0,i} + \beta_{1,i}Y_i(t) + \beta_{2,i}\Delta_{i,1}(t) + \beta_{3,i}\Delta_{i,2}(t) + \beta_{4,i}\Delta_{i,3}(t)$$
+where $\boldsymbol{X}_i(t) = (1, Y_i(t), \Delta_{i,1}(t), \Delta_{i,2}(t), \Delta_{i,3}(t))$, $\boldsymbol{\beta}_i = (\beta_{0,i}, \beta_{1,i}, \beta_{2,i}, \beta_{3,i}, \beta_{4,i})$
+
+then, we can find that
 $$Y_i(t+6) {\sim} N(\boldsymbol{X}_i(t)\boldsymbol{\beta}_i^\top, \sigma^2)$$
-where $\boldsymbol{X}_i(t) = (1, Y_i(t), \Delta_{i,1}(t), \Delta_{i,2}(t), \Delta_{i,3}(t))$, and $\boldsymbol{\beta}_i = (\beta_{0,i}, \beta_{1,i}, \beta_{2,i}, \beta_{3,i}, \beta_{4,i})$. Therefore, the wind speed of $i^{th}$ hurricane at time $t$ follows the normal distribution with the pdf below
 
-$$f_{Y_i(t+6)}(y_i(t+6) \mid \boldsymbol{X}_i(t), \boldsymbol{\beta}_i,  \sigma^2) = \frac{1}{\sqrt{2\pi}\sigma} \exp\Big\{-\frac{1}{2\sigma^2}\Big(y_i(t+6) - \boldsymbol{X}_i(t)\boldsymbol{\beta}_i^\top\Big)^2 \Big\}$$
-Therefore, the conditional distribution of $Y_i$, the wind speed of $i^{th}$ hurricane follows the multivariate normal distribution below, (since $Y_i(t)$'s are independent across $t$)
+For $i^{th}$ hurricane, there may be $m_i$ times of record (excluding the first observation), let
+$$\boldsymbol{Y}_i = 
+\begin{pmatrix}
+Y_i(t_0+6)\\
+Y_i(t_1+6)\\
+\vdots\\
+Y_i(t_{m_i-1}+6)
+\end{pmatrix}_{m_i\times 1}
+$$
+denotes the $m_i$-dimensional result vector for the $i^{th}$ hurricane
+Therefore, since $Y_i(t)$'s are independent across $t$
 
-$$(\boldsymbol{Y}_i \mid \boldsymbol{X}_i, \boldsymbol{\beta}_i, \sigma^2) \sim \mathcal{N}(\boldsymbol{X}_i\boldsymbol{\beta}_i^\top, \sigma^2 I)$$
+$$\boldsymbol{Y}_i \mid \boldsymbol{X}_i, \boldsymbol{\beta}_i, \sigma^2 \sim N(\boldsymbol{X}_i\boldsymbol{\beta}_i^\top, \sigma^2 I)$$
 
-where $Y_i$ is an $m_i$-dimensional vector and $\boldsymbol{X}_i$ is a $m_i \times d$ matrix.
+where 
+$$
+\boldsymbol{X}_i = 
+\begin{pmatrix}
+1 & Y_i(t_0)& \Delta_{i,1}(t_0) &\Delta_{i,2}(t_0) &\Delta_{i,3}(t_0)\\
+1 & Y_i(t_1)& \Delta_{i,1}(t_1) &\Delta_{i,2}(t_1) &\Delta_{i,3}(t_1)\\
+\vdots&\vdots&\vdots&\vdots&\vdots\\
+1 & Y_i(t_{m_i-1})& \Delta_{i,1}(t_{m_i-1}) &\Delta_{i,2}(t_{m_i-1}) &\Delta_{i,3}(t_{m_i-1})
+\end{pmatrix}_{m_i\times d}
+$$ 
 
-Hence, the joint likelihood function of all $i's$ hurricanes can be expresses as
-$$L_{Y}(\textbf{B},  \sigma^2 ) = \prod_{i=1}^n \Big\{\det(2\pi\sigma^2 I)^{-\frac{1}{2}} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}$$
-
-where $I$ is an identical matrix with dimension consistent with $Y_i$.
-
-From Bayesian theorem, the posterior distribution for $\Theta$ is
-
-$$\pi(\boldsymbol{\Theta}|\boldsymbol{Y}) = \pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \Sigma \mid \boldsymbol{Y}) \propto L_{Y}(\textbf{B},  \sigma^2 ) \times \pi(\textbf{B} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma}) \times \pi(\boldsymbol{\mu}) \times \pi(\sigma^2) \times \pi(\boldsymbol{\Sigma}),$$
-
-where $\pi(\textbf{B} \mid \boldsymbol{\beta},  \Sigma)$ is the joint multivariate normal density of $\beta$, since
+and the pdf of $\boldsymbol{Y}_i$ is
+$$
+\begin{aligned}
+f(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 ) = &  \det(2\pi\sigma^2 I_{(m_i\times m_i)})^{-\frac{1}{2}} \exp\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I_{(m_i\times m_i)})^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\}\\
+= & (2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I_{(m_i\times m_i)})^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}
+\end{aligned}
+$$
+Since
 $$\boldsymbol{\beta}_{i} \sim N(\boldsymbol{\mu}, \boldsymbol{\Sigma})$$
 
 Therefore
-$$\pi(\textbf{B} \mid \boldsymbol{\mu},  \boldsymbol{\Sigma}) = \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\}.$$
+$$\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma}) = \det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) $$
+Notice that $\textbf{B} = (\boldsymbol{\beta}_1^\top,..., \boldsymbol{\beta}_n^\top)^\top$, i.e.
+$$
+\textbf{B} = 
+\begin{pmatrix}
+\beta_{0,1}&\beta_{1,1}&\beta_{2,1}& \beta_{3,1}&\beta_{4,1}\\
+\beta_{0,2}&\beta_{1,2}&\beta_{2,2}& \beta_{3,2}&\beta_{4,2}\\
+\vdots&\vdots&\vdots&\vdots&\vdots\\
+\beta_{0,n}&\beta_{1,n}&\beta_{2,n}& \beta_{3,n}&\beta_{4,n}
+\end{pmatrix}_{n\times d}
+$$
 
-So we have the following posterior distribution:
+
+So, by using Bayesian rule, we have the following posterior distribution:
 
 $$
 \begin{aligned}
@@ -72,9 +101,108 @@ $$
 \end{aligned}
 $$
 
-```{r loglik_functions}
+
+To apply MCMC, we need to find conditional posterior distribution of each parameter, then we can implement Gibbs sampling on these conditional posterior distributions.
+
+
+
+1. Finding the posterior distribution of $\textbf{B}$ 
+
+Since finding the posterior distribution of $\textbf{B}$ is the same to find the posterior distribution of $\boldsymbol{\beta_i}$, we try to derive the conditional distribution $\pi(\boldsymbol{\beta_i} | .)$
+
+$$
+\begin{aligned}
+\pi(\textbf{B} | .) &\propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\textbf{B}
+\mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\\
+& \propto \prod_{i=1}^nf(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 )\prod_{i=1}^n\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma}) \\
+& \propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\} \\
+& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\} \\
+& \propto \prod_{i=1}^n\exp\{-\frac{1}{2}\Big((\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)+(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top)\Big)\}\\
+&= \exp\{-\frac{1}{2}\Big(\boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{Y}_i +\boldsymbol{\beta}_i\boldsymbol{X}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i\boldsymbol{\beta}_i^\top - \boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i\boldsymbol{\beta}_i^\top \\
+& -\boldsymbol{\beta}_i\boldsymbol{X}_i^\top(\sigma^2 I)^{-1}\boldsymbol{Y}_i+ \boldsymbol{\beta}_i\boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top+\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top - \boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top- \boldsymbol{\beta}_i\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top\Big)\} \\ 
+& = \exp\{-\frac{1}{2}\Big(\boldsymbol{\beta}_i\boldsymbol{V}\boldsymbol{\beta}_i^\top-\boldsymbol{M}\boldsymbol{\beta}_i^\top-\boldsymbol{\beta}_i\boldsymbol{M}_i^\top+\boldsymbol{R}\Big)\}
+\end{aligned}$$
+
+
+where,
+\begin{align*}
+    \boldsymbol{V} & = \boldsymbol{\Sigma}^{-1} + \boldsymbol{X}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i \\
+    \boldsymbol{M} & = \boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{X}_i+\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1} \\
+    \boldsymbol{R} & = \boldsymbol{Y}_i^\top(\sigma^2 I)^{-1}\boldsymbol{Y}_i +\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top
+\end{align*}
+
+re-writing the conditional posterior distribution, and ignoring some constant terms
+
+$$\pi(\textbf{B} | .)\propto  \prod_{i=1}^n\exp\{ (\boldsymbol{\beta}_i^\top-\boldsymbol{V}^{-1}\boldsymbol{M})^\top\boldsymbol{V}(\boldsymbol{\beta}_i^\top-\boldsymbol{V}^{-1}\boldsymbol{M})\}$$
+Hence, each $\boldsymbol{\beta}_i$ has a conditional posterior multivariate normal distribution
+
+$$\pi(\boldsymbol{\beta}_i | .)\sim N(\boldsymbol{V}^{-1}\boldsymbol{M}, \boldsymbol{V}^{-1})$$
+
+2. Finding the posterior distribution of $\pi(\sigma^2| .)$
+
+\begin{align*}
+\pi(\sigma^2| .) & \propto L_{Y}(\textbf{B}^\top,  \sigma^2 ) \times \pi(\boldsymbol{\sigma}^2) \\
+& \propto \frac{1}{\sigma^2} \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\Big(-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\Big)\Big\}\\
+& \propto {\frac{1}{\sigma^2}}^(\frac{\sum\limits_{i=1}^{n} m_i}{2}+1) \exp\{-\frac{1}{2\sigma^2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top) \}
+\end{align*}
+
+which follows the form of pdf of inverse gamma distribution
+
+$$
+f(x;\alpha,\beta) = \frac{\beta^{\alpha}}{\Gamma(\alpha)}\frac{1}{x}\exp\{-\frac{\beta}{x}\}
+$$
+in this case, $x$ is replaced by $\sigma^2$, $\alpha$ is replaced by $\frac{1}{2}\sum\limits_{i=1}^{n} m_i$, $\beta$ is replaced by $\frac{1}{2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)$ 
+
+i.e.
+
+$$\pi(\sigma^2| .)\sim IG(\frac{1}{2}\sum\limits_{i=1}^{n} m_i,\frac{1}{2}\sum\limits_{i=1}^{n}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top))$$
+3. Finding the posterior distribution of $\pi(\boldsymbol{\Sigma} | .)$
+
+\begin{align*}
+\pi(\boldsymbol{\Sigma}| .)  \propto &  \pi(\textbf{B} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\pi(\boldsymbol{\Sigma}^{-1}) \\
+\propto & \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\}|\Sigma|^{-(d+1)} \exp(-\frac{1}{2}\Sigma^{-1}) \\
+\propto & |\Sigma|^{-(n+d+1+d+1)/2}\exp\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top-\frac{1}{2}\Sigma^{-1}\}\\
+\propto & |\Sigma|^{-(n+d+1+d+1)/2}\exp\{-\frac{1}{2}tr(\boldsymbol{S}\boldsymbol{\Sigma}^{-1}) \}
+\end{align*}
+
+where
+$$\boldsymbol{S} = \boldsymbol{I}+\sum\limits_{i=1}^{n}(\boldsymbol{\beta}_i - \boldsymbol{\mu})(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top$$
+which is the form of pdf of the inverse wishart distribution Inverse Wishart$(\textbf{V},\boldsymbol{S})$, where $\textbf{V} = n+d+1$, i.e.
+
+$$\pi(\boldsymbol{\Sigma} | .)\sim IW(n+d+1,\  \boldsymbol{I}+\sum\limits_{i=1}^{n}(\boldsymbol{\beta}_i - \boldsymbol{\mu})(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top)$$
+4. Finding the posterior distribution of $\pi(\boldsymbol{\mu} | .)$
+
+\begin{align*}
+\pi(\boldsymbol{\mu} | .)\propto & \pi(\textbf{B} \mid \boldsymbol{\mu}, \boldsymbol{\Sigma})\pi(\boldsymbol{\mu}) \\
+= & \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp(-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top) \Big\}\\
+\propto &\exp\{-\frac{1}{2}\sum\limits_{i=1}^{n}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\} \\ 
+\propto & \exp\{-\frac{1}{2}\Big(\sum\limits_{i=1}^{n}\boldsymbol{\beta}_i\ \boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top + n\boldsymbol{\mu}\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top-2\sum\limits_{i=1}^{n}\boldsymbol{\beta}_i\boldsymbol{\Sigma}^{-1}\boldsymbol{\mu}^\top\Big)\} \\
+= & \exp\{-\frac{1}{2}\Big(\boldsymbol{\mu}\boldsymbol{V'}\boldsymbol{\mu}^\top - 2\boldsymbol{M'}\boldsymbol{\mu}^\top +\boldsymbol{R'}\Big)\}\\
+\propto & \exp\{-\frac{1}{2}(\boldsymbol{\mu}-\boldsymbol{V'}^{-1}\boldsymbol{M'})\boldsymbol{V'}(\boldsymbol{\mu}-\boldsymbol{V'}^{-1}\boldsymbol{M'})^\top\}
+\end{align*}
+
+where
+
+$$
+\boldsymbol{V'} = n\boldsymbol{\Sigma}^{-1} ,\ 
+\boldsymbol{M'} = \sum\limits_{i=1}^{n}\boldsymbol{\beta}_i\boldsymbol{\Sigma}^{-1} ,\
+\boldsymbol{R'} =  \sum\limits_{i=1}^{n}\boldsymbol{\beta}_i\ \boldsymbol{\Sigma}^{-1}\boldsymbol{\beta}_i^\top
+$$
+Hence
+
+$$\pi(\boldsymbol{\Sigma} | .)\sim N(\boldsymbol{V'}^{-1}\boldsymbol{M'},\boldsymbol{V'}^{-1})$$
+
+## Markov Chain Monte Carlo
+
+Because our hierarchical Bayesian Model exploited non-informative priors for four parameters, the Gibbs Sampling method would be implemented, updating parameters in the following order from their conditional posteriors distributions, $\boldsymbol{B},\ \sigma^2,\ \boldsymbol{\Sigma}$ and $\boldsymbol{\mu}$.
+
+
+
+
+
+
+```{r loglik_functions, echo=FALSE}
 # betavec: 1*5
-# B:n*5
 # sigma2: 1*1
 # mu: 1*5
 # Sigma: 5*5
@@ -104,7 +232,7 @@ loglik_Sigma <- function(Sigma, d){
 # log likelihood for y given a specific hurricane's data given sigma2 and betavec
 loglik_Y <- function(y, X, betavec, sigma2){
     m = length(y)
-    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) * solve(diag(sigma2, m)) * (X %*% t(betavec))) 
+    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) %*% solve(diag(sigma2, m)) %*% (X %*% t(betavec))) 
     loglik = log(loglik)
     return(loglik)
     
@@ -122,4 +250,6 @@ loglik_betavec <- function(betavec, mu, Sigma){
 }
 
 ```
+
+
 

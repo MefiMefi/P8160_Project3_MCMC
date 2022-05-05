@@ -1,0 +1,183 @@
+---
+title: "Gibbs_alg"
+author: "Renjie Wei"
+date: '2022-05-04'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+load("./dt_long.RData")
+dt_wind =
+  dt_long %>% 
+    mutate(intercept = 1) %>% 
+    dplyr::select(c("ID", "Wind.kt", "intercept", "Wind_prev", "Lat_change", "Long_change", "Wind_change")) %>%
+    drop_na()
+
+IDs <- unique(dt_wind$ID)
+
+dt_mtx <- list(NULL)
+
+ID_in <- NULL
+
+for (i in 1:length(IDs)) {
+    dt_temp =  dt_wind[which(dt_wind$ID == IDs[i]),][,2:7]
+    m = nrow(dt_temp)
+    # need to drop observations less than 5
+    if (m <= 5){
+        next
+    }else{
+        ID_in = c(ID_in,  IDs[i])
+    }
+}
+
+for (i in 1:length(ID_in)) {
+    dt_temp = dt_wind[which(dt_wind$ID == ID_in[i]),][,2:7]
+    dt_temp = dt_temp %>% as.matrix()
+    dt_mtx[[i]] = dt_temp
+}
+```
+
+```{r posterior_samp}
+library(MASS)
+library(tidyverse)
+library(extraDistr)
+library(matrixsampling)
+library(parallel)
+library(foreach)
+library(doParallel)
+
+# posterior of B
+# each beta_i 1*5
+# B n*5
+
+post.B <- function(dt, muvec, sigma2, Sigma){
+   n = length(dt)
+   B = NULL
+   RSS = NULL
+   m = NULL
+   for (i in 1:n){
+       # stuffs to define the distribution
+       X = as.matrix(dt[[i]][,-1]) 
+       y = as.vector(dt[[i]][,1])
+       V = sigma2^(-1) * t(X) %*% X + solve(Sigma)
+       M = sigma2^(-1) * t(y) %*% X + muvec %*% solve(Sigma)
+       mean_bi = solve(V) %*% t(M) # we need a 5*1
+       vcov_bi = solve(V)
+       bi = mvrnorm(1, mu = mean_bi, Sigma = vcov_bi)
+       B = rbind(B, bi)
+       # calculate RSS,m_i for sigma2
+       RSS = rbind(RSS, sum((y - X %*% bi)^2))
+       m = rbind(m, nrow(X))
+   }
+   return(list(B = B, RSS = RSS, m = m))
+}
+
+# test passed
+testB = post.B(dt = dt_mtx, muvec = rep(0,5), sigma2 = 2, Sigma = diag(2,5,5))
+
+
+# sampling sigma2 from a inverse gamma, need sum(m_i) and SSR
+post.sigma2 <- function(m, RSS){
+    alpha_ = sum(m)/2
+    beta_ = sum(RSS)/2
+    sigma2 = rinvgamma(1, alpha = alpha_, beta = beta_)
+    return(sigma2)
+}
+
+# test passed
+testsigma2 = post.sigma2(testB$m, testB$RSS)
+
+# sampling Sigma from inverse wishart distribution
+post.Sigma <- function(B, muvec){
+    n = nrow(B)
+    S.matrix = diag(1, 5, 5)
+    for (i in 1:n){
+        beta_i = B[i,]
+        S.matrix = S.matrix + (beta_i-muvec) %*% t(beta_i-muvec)
+    }
+    v = n + 5 + 1
+    Sigma = rinvwishart(1, nu = v, Omega = S.matrix, checkSymmetry = F)
+    return(Sigma[,,1])
+}
+
+# test passed
+testSigma = post.Sigma(testB$B, rep(1,5))
+
+# sampling muvec from multivariate normal distribution
+post.mu <- function(B, Sigma){
+    n = nrow(B)
+    mean_mu = colMeans(B)
+    vcov_mu = 1/n * Sigma
+    muvec = mvrnorm(1, mean_mu, vcov_mu)
+    return(muvec)
+}
+
+# test passed
+testmuvec = post.mu(testB$B, testSigma)
+```
+
+```{r MCMC_Gibbs}
+MCMC.Gibbs <- function(dt, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
+    B.res = list()
+    sigma2.res = list()
+    Sigma.res = list()
+    muvec.res = list()
+    
+    # initialize B
+    init.Bstuff = post.B(dt, init.muvec, init.sigma2, init.Sigma)
+    
+    cur.stuff = init.Bstuff
+    cur = list(B = init.Bstuff$B, sigma2 = init.sigma2, muvec = init.muvec, Sigma = init.Sigma)
+    
+    B.res[[1]] = cur$B
+    sigma2.res[[1]] = cur$sigma2
+    Sigma.res[[1]] = cur$Sigma
+    muvec.res[[1]] = cur$muvec
+    
+    prev.stuff = cur.stuff
+    prev = cur
+    
+    # start iteration
+    for (i in 2:max.iter) {
+        cur.stuff = post.B(dt, prev$muvec, prev$sigma2, prev$Sigma)
+        sigma2 = post.sigma2(cur.stuff$m, cur.stuff$RSS)
+        Sigma = post.Sigma(cur.stuff$B, prev$muvec)
+        muvec = post.mu(cur.stuff$B, Sigma)
+        
+        # update current parameters
+        cur = list(B = cur.stuff$B, sigma2 = sigma2, muvec = muvec, Sigma = Sigma)
+        prev.stuff = cur.stuff
+        prev = cur
+        
+        # append to final result
+        B.res[[i]] = cur$B
+        sigma2.res[[i]] = cur$sigma2
+        Sigma.res[[i]] = cur$Sigma
+        muvec.res[[i]] = cur$muvec
+        
+    }
+    return(list(
+        B = B.res,
+        sigma2 = sigma2.res,
+        Sigma = Sigma.res,
+        muvec = muvec.res
+    ))
+}
+```
+
+```{r test_mcmc}
+# run 10 cycles
+test.MCMC.res = MCMC.Gibbs(dt_mtx, init.muvec = c(1,2,3,4,5), init.sigma2 = 1, init.Sigma = diag(0.3, 5, 5), max.iter = 100)
+
+```
+
+```{r run_MCMC, cache=T}
+MCMC.res = MCMC.Gibbs(dt_mtx, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
+save(MCMC.res,file = "MCMC.res.RData")
+```
+
