@@ -1,0 +1,68 @@
+---
+title: "MCMC_result_summary"
+author: "Renjie Wei"
+date: '2022-05-06'
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+library(tidyverse)
+load("MCMC.res.2.RData")
+```
+
+```{r extract_beta_sigma}
+beta.res.plot = NULL
+for (i in 5001:10000) {
+    B.res = MCMC.res.2$B[[i]]
+    B.res = as.data.frame(B.res)
+    B.res = colMeans(B.res)
+    beta.res.plot = rbind(beta.res.plot, B.res)
+}
+
+sigma.res.plot = NULL
+for (i in 5001:10000) {
+    sigma.res = MCMC.res.2$sigma2[[i]]
+    sigma.res = as.data.frame(sigma.res)
+    sigma.res.plot = rbind(sigma.res.plot, sigma.res)
+}
+
+mu.res.plot = NULL
+for (i in 5001:10000) {
+    mu.res = MCMC.res.2$muvec[[i]]
+    mu.res = as.data.frame(t(mu.res))
+    mu.res.plot = rbind(mu.res.plot, mu.res)
+}
+
+```
+```{r plot_mc_chain}
+par(mfrow = c(3, 4))
+plot(beta.res.plot[,1],type = "l", main = "Trace plot of beta0")
+plot(beta.res.plot[,2],type = "l", main = "Trace plot of beta1")
+plot(beta.res.plot[,3],type = "l", main = "Trace plot of beta2")
+plot(beta.res.plot[,4],type = "l", main = "Trace plot of beta3")
+plot(beta.res.plot[,5],type = "l", main = "Trace plot of beta4")
+plot(sigma.res.plot[,1],type = "l", main = "Trace plot of sigma2")
+plot(mu.res.plot[,1],type = "l", main = "Trace plot of mu0")
+plot(mu.res.plot[,2],type = "l", main = "Trace plot of mu1")
+plot(mu.res.plot[,3],type = "l", main = "Trace plot of mu2")
+plot(mu.res.plot[,4],type = "l", main = "Trace plot of mu3")
+plot(mu.res.plot[,5],type = "l", main = "Trace plot of mu4")
+
+par(mfrow = c(3, 4))
+hist(beta.res.plot[,1], main = "Histogram plot of beta0")
+hist(beta.res.plot[,2], main = "Histogram plot of beta1")
+hist(beta.res.plot[,3], main = "Histogram plot of beta2")
+hist(beta.res.plot[,4], main = "Histogram plot of beta3")
+hist(beta.res.plot[,5], main = "Histogram plot of beta4")
+hist(sigma.res.plot[,1], main = "Histogram plot of sigma2")
+hist(mu.res.plot[,1], main = "Histogram plot of mu0")
+hist(mu.res.plot[,2], main = "Histogram plot of mu1")
+hist(mu.res.plot[,3], main = "Histogram plot of mu2")
+hist(mu.res.plot[,4], main = "Histogram plot of mu3")
+hist(mu.res.plot[,5], main = "Histogram plot of mu4")
+```
+
