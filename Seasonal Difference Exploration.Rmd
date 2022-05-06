@@ -1,0 +1,73 @@
+---
+title: "Seasonal Difference Exploration"
+author: "Hao Zheng (hz2770)"
+date: "5/6/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+
+## Explore the seasonal differences
+```{r}
+load("./dt_long.RData")
+load("./MCMC.res.2.RData")
+
+dt_wind =
+  dt_long %>% 
+    mutate(intercept = 1) %>% 
+    drop_na()
+# 700 after drop_na
+IDs <- unique(dt_wind$ID)
+
+# 694 observations >=5
+ID_in <- NULL
+for (i in 1:length(IDs)) {
+    dt_temp =  dt_wind[which(dt_wind$ID == IDs[i]),][,1]
+    m = nrow(dt_temp)
+    # need to drop observations less than 5
+    if (m <= 5){
+        next
+    }else{
+        ID_in = c(ID_in,  IDs[i])
+    }
+}
+
+dt_mtx_full = dt_wind %>% filter(ID %in% ID_in)
+
+dt_season <- dt_mtx_full[!duplicated(dt_mtx_full$ID),] %>% 
+  select(ID, Season, Month, Nature)
+
+# use posterior mean of beta as our final Bayesian model coefficients
+beta.res.post = matrix(rep(0,694*5), 694, 5)
+for (i in 5001:10000) {
+    B.res = MCMC.res.2$B[[i]]
+    B.res = as.data.frame(B.res)
+    beta.res.post = beta.res.post + B.res
+}
+
+beta.res.postmean = beta.res.post/5000
+
+season_diff <- cbind(dt_season, beta.res.postmean) %>% janitor::clean_names()
+
+# Beta0
+intercept.fit <- lm(intercept ~ month + season + nature, data = season_diff)
+# Beta1
+wind_prev.fit <- lm(wind_prev ~ month + season + nature, data = season_diff)
+# Beta2
+lat_change.fit <- lm(lat_change ~ month + season + nature, data = season_diff)
+# Beta3
+long_change.fit <- lm(long_change ~ month + season + nature, data = season_diff)
+#Beta4
+wind_change.fit <- lm(wind_change ~ month + season + nature, data = season_diff)
+
+summary(intercept.fit)
+summary(wind_prev.fit)
+summary(lat_change.fit)
+summary(long_change.fit)
+summary(wind_change.fit)
+```
+

@@ -1,0 +1,16 @@
+---
+title: "Introduction to the algorithm"
+author: "Hao Zheng (hz2770)"
+date: "5/5/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## MCMC
+
+
+## Gibbs
+Gibbs Sampler is one of Bayesian MCMC approaches with a known conditional distribution. By sampling from each random variables given the others many times, Gibbs Sampler is able to 
