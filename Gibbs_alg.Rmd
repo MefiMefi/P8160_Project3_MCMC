@@ -73,7 +73,7 @@ dt_mtx_test = dt_wind %>% filter(ID %in% ID_test) %>% nest() %>% pull(data)
 #    dt_mtx_test[[i]] = dt_temp
 #}
 
-
+# right way!
 # another way to partitioning dataset, each i set 80% of observations to training set
 dt_train = list(NULL)
 dt_test = list(NULL)

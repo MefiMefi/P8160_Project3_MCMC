@@ -14,6 +14,24 @@ library(tidyverse)
 load("MCMC.res.2.RData")
 ```
 
+```{r ols_try}
+load("dt_train.RData")
+ols.beta.res = NULL
+for(i in 1:length(dt_train)){
+    lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
+    ols.beta.res = rbind(ols.beta.res, coef(lm.mdl))
+}
+
+par(mfrow = c(1, 5))
+hist(ols.beta.res[,1])
+hist(ols.beta.res[,2])
+hist(ols.beta.res[,3])
+hist(ols.beta.res[,4])
+hist(ols.beta.res[,5])
+```
+
+
+
 ```{r extract_beta_sigma}
 beta.res.plot = NULL
 for (i in 5001:10000) {
@@ -39,30 +57,60 @@ for (i in 5001:10000) {
 
 ```
 ```{r plot_mc_chain}
-par(mfrow = c(3, 4))
+par(mfrow = c(2, 5))
 plot(beta.res.plot[,1],type = "l", main = "Trace plot of beta0")
 plot(beta.res.plot[,2],type = "l", main = "Trace plot of beta1")
 plot(beta.res.plot[,3],type = "l", main = "Trace plot of beta2")
 plot(beta.res.plot[,4],type = "l", main = "Trace plot of beta3")
 plot(beta.res.plot[,5],type = "l", main = "Trace plot of beta4")
-plot(sigma.res.plot[,1],type = "l", main = "Trace plot of sigma2")
+#plot(sigma.res.plot[,1],type = "l", main = "Trace plot of sigma2")
 plot(mu.res.plot[,1],type = "l", main = "Trace plot of mu0")
 plot(mu.res.plot[,2],type = "l", main = "Trace plot of mu1")
 plot(mu.res.plot[,3],type = "l", main = "Trace plot of mu2")
 plot(mu.res.plot[,4],type = "l", main = "Trace plot of mu3")
 plot(mu.res.plot[,5],type = "l", main = "Trace plot of mu4")
 
-par(mfrow = c(3, 4))
+par(mfrow = c(2, 5))
 hist(beta.res.plot[,1], main = "Histogram plot of beta0")
 hist(beta.res.plot[,2], main = "Histogram plot of beta1")
 hist(beta.res.plot[,3], main = "Histogram plot of beta2")
 hist(beta.res.plot[,4], main = "Histogram plot of beta3")
 hist(beta.res.plot[,5], main = "Histogram plot of beta4")
-hist(sigma.res.plot[,1], main = "Histogram plot of sigma2")
+#hist(sigma.res.plot[,1], main = "Histogram plot of sigma2")
 hist(mu.res.plot[,1], main = "Histogram plot of mu0")
 hist(mu.res.plot[,2], main = "Histogram plot of mu1")
 hist(mu.res.plot[,3], main = "Histogram plot of mu2")
 hist(mu.res.plot[,4], main = "Histogram plot of mu3")
 hist(mu.res.plot[,5], main = "Histogram plot of mu4")
+```
+
+
+```{r}
+var(beta.res.plot[,1])
+var(beta.res.plot[,2])
+var(beta.res.plot[,3])
+var(beta.res.plot[,4])
+var(beta.res.plot[,5])
+```
+
+```{r}
+var(mu.res.plot[,1])
+var(mu.res.plot[,2])
+var(mu.res.plot[,3])
+var(mu.res.plot[,4])
+var(mu.res.plot[,5])
+```
+
+```{r extract_each_beta}
+# use posterior mean of beta as our final Bayesian model coefficients
+
+beta.res.post = matrix(rep(0,694*5), 694, 5)
+for (i in 5001:10000) {
+    B.res = MCMC.res.2$B[[i]]
+    B.res = as.data.frame(B.res)
+    beta.res.post = beta.res.post + B.res
+}
+
+beta.res.postmean = beta.res.post/ 5000
 ```
 
