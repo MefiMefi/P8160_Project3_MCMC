@@ -13,8 +13,8 @@ knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 dt= read.csv("./hurrican703.csv")
 ggplot(data=dt, aes(x = Longitude, y = Latitude)) + 
-  stat_summary_2d(data = dt, aes(x = Longitude, y = Latitude, z = dt$Wind.kt), fun = median, binwidth = c(1, 1), show.legend = TRUE) +
-  ggtitle("Distribution of Hurricanes at Different Location")
+  stat_summary_2d(data = dt, aes(x = Longitude, y = Latitude, z = dt$Wind.kt), fun = median, binwidth = c(1, 1), show.legend = TRUE) 
+# + ggtitle("Distribution of Hurricanes at Different Location")
 library(data.table)
 dt <- as.data.table(dt)
 summary(dt)
@@ -45,8 +45,8 @@ storms_month_name %>%
   dplyr::group_by(Month) %>% 
   mutate(Month =  factor(Month, levels = month.name)) %>%  
   ggplot(aes(x = Month)) +
-  geom_bar() +
-  ggtitle("Count of Hurricanes in Each Month")
+  geom_bar()
+# + ggtitle("Count of Hurricanes in Each Month")
 
 dt_long %>% 
   dplyr::group_by(Month) %>% 
@@ -55,8 +55,8 @@ dt_long %>%
   mutate(Month =  factor(Month, levels = month.name))%>% 
   ggplot(aes(x = Month, y = avg_speed)) +
   geom_point() +
-  scale_y_continuous("Average Speed (knot)") +
-  ggtitle("Average Speed (knot) of Hurricanes in Each Month")
+  scale_y_continuous("Average Speed (knot)")
+# + ggtitle("Average Speed (knot) of Hurricanes in Each Month")
 ```
 
 We use a bar plot to examine the number of hurricanes in each month. From this plot, we can see that September is the month with the most hurricanes, while there are no hurricanes in February and March. Hurricanes in September also have the highest average wind speed as we can see in the average speed plot. 
@@ -66,8 +66,9 @@ We use a bar plot to examine the number of hurricanes in each month. From this p
 storms_season_name = distinct(group_by(select(dt_long, Season, ID), Season))
 ggplot(data = storms_season_name) + 
   geom_bar(aes(x = Season)) +
-  ggtitle("Count of Hurricanes in Each Year") +
   scale_x_continuous("Year")
+# + ggtitle("Count of Hurricanes in Each Year")
+  
 
 dt_long %>% 
   dplyr::group_by(Season) %>% 
@@ -77,8 +78,8 @@ dt_long %>%
   geom_point() +
   geom_smooth(method = "loess") +
   scale_y_continuous("Average Speed (knot)") +
-  scale_x_continuous("Year") +
-  ggtitle("Average Speed (knot) of Hurricanes in Each Year")
+  scale_x_continuous("Year") 
+# + ggtitle("Average Speed (knot) of Hurricanes in Each Year")
 ```
 
 If we group the hurricanes by years, we can see in general, we have more observations in recently years compared to 50 years ago. However, the average wind speed seems to have a decreasing trend.
@@ -87,8 +88,8 @@ If we group the hurricanes by years, we can see in general, we have more observa
 # Nature and count
 storms_nature_name = distinct(group_by(select(dt_long, Nature, ID), Nature))
 ggplot(data = storms_nature_name) + 
-  geom_bar(aes(x = Nature)) +
-  ggtitle("Count of Hurricanes in Each Nature")
+  geom_bar(aes(x = Nature))
+# + ggtitle("Count of Hurricanes in Each Nature")
 
 dt_long %>% 
   dplyr::group_by(Nature) %>% 
@@ -96,8 +97,8 @@ dt_long %>%
   distinct(Nature, avg_speed) %>% 
   ggplot(aes(x = Nature, y = avg_speed)) +
   geom_point() +
-  scale_y_continuous("Average Speed (knot)") +
-  ggtitle("Average Speed (knot) of Hurricanes in Each Nature")
+  scale_y_continuous("Average Speed (knot)") 
+# + ggtitle("Average Speed (knot) of Hurricanes in Each Nature")
 ```
 
 We also compare the hurricanes with different natures. In our dataset, there are 1214 different nature ratings. This number is larger than the number of hurricanes because some hurricanes are in different natures at different time. From this plot, we know that more than half of the natures are in Tropical Storm category. This nature also have the highest average wind speed at about 60 knot, while the disturbance and not rated hurricanes have average wind speed at round 20 knot.
