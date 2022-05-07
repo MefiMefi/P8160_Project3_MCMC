@@ -248,3 +248,30 @@ save(dt_test,file = "dt_test.RData")
 save(ID_in, file = "ID_in.RData")
 ```
 
+```{r try_bad_starting_value}
+# do we need to do that?
+
+```
+
+
+```{r ols_rss_train}
+ols_rss_train = NULL
+for(i in 1:length(dt_train)){
+    lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
+    ols_rss_train = rbind(ols_rss_train , sum((predict(lm.mdl, newdata = dt_train[[i]]) - dt_train[[i]][,"Wind.kt"])^2))
+}
+```
+
+```{r mcmc_rss_train}
+mcmc_rss_train = NULL
+for (i in 1:length(dt_train)){
+    betas = as.matrix(beta.res.postmean[i,1:5])
+    mcmc_rss_train = rbind(mcmc_rss_train, sum((as.matrix(dt_train[[i]][2:6]) %*% t(betas) - dt_train[[i]][,1])^2))
+}
+```
+
+```{r}
+colMeans(mcmc_rss_train)
+colMeans(ols_rss_train)
+```
+

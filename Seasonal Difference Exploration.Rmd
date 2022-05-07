@@ -10,43 +10,25 @@ knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
 ```
 
-
 ## Explore the seasonal differences
 ```{r}
 load("./dt_long.RData")
-load("./ID_in.RData") 
+load("./ID_in.RData")
+load("./beta.res.postmean.RData")
 
-dt_wind =
-  dt_long %>% 
-    mutate(intercept = 1) %>% 
-    drop_na()
-# 700 after drop_na
-IDs <- unique(dt_wind$ID)
-
-# 697 observations >=5
-
-
-dt_mtx_full = dt_wind %>% filter(ID %in% ID_in)
-
-dt_season <- dt_mtx_full[!duplicated(dt_mtx_full$ID),] %>% 
+dt_season <-
+  dt_long %>%
+  drop_na() %>% 
+  filter(ID %in% ID_in) %>% 
+  distinct(ID, .keep_all = TRUE) %>% 
   select(ID, Season, Month, Nature) %>% 
   mutate(Month = factor(Month, levels = month.name))
-
-
 ```
 
-```{r, eval=FALSE}
-# use posterior mean of beta as our final Bayesian model coefficients
-beta.res.post = matrix(rep(0,694*5), 694, 5)
-for (i in 5001:10000) {
-    B.res = beta.res.postmean$B[[i]]
-    B.res = as.data.frame(B.res)
-    beta.res.post = beta.res.post + B.res
-}
-
-beta.res.postmean = beta.res.post/5000
-
-season_diff <- cbind(dt_season, beta.res.postmean) %>% janitor::clean_names()
+```{r}
+season_diff <- 
+  merge(dt_season, beta.res.postmean, by = c("ID")) %>%
+  janitor::clean_names()
 
 # Beta0
 intercept.fit <- lm(intercept ~ month + season + nature, data = season_diff)
