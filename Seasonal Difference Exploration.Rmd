@@ -14,7 +14,7 @@ library(tidyverse)
 ## Explore the seasonal differences
 ```{r}
 load("./dt_long.RData")
-load("./MCMC.res.2.RData")
+load("./ID_in.RData") 
 
 dt_wind =
   dt_long %>% 
@@ -23,18 +23,8 @@ dt_wind =
 # 700 after drop_na
 IDs <- unique(dt_wind$ID)
 
-# 694 observations >=5
-ID_in <- NULL
-for (i in 1:length(IDs)) {
-    dt_temp =  dt_wind[which(dt_wind$ID == IDs[i]),][,1]
-    m = nrow(dt_temp)
-    # need to drop observations less than 5
-    if (m <= 5){
-        next
-    }else{
-        ID_in = c(ID_in,  IDs[i])
-    }
-}
+# 697 observations >=5
+
 
 dt_mtx_full = dt_wind %>% filter(ID %in% ID_in)
 
@@ -42,10 +32,14 @@ dt_season <- dt_mtx_full[!duplicated(dt_mtx_full$ID),] %>%
   select(ID, Season, Month, Nature) %>% 
   mutate(Month = factor(Month, levels = month.name))
 
+
+```
+
+```{r, eval=FALSE}
 # use posterior mean of beta as our final Bayesian model coefficients
 beta.res.post = matrix(rep(0,694*5), 694, 5)
 for (i in 5001:10000) {
-    B.res = MCMC.res.2$B[[i]]
+    B.res = beta.res.postmean$B[[i]]
     B.res = as.data.frame(B.res)
     beta.res.post = beta.res.post + B.res
 }
@@ -71,4 +65,5 @@ summary(lat_change.fit)
 summary(long_change.fit)
 summary(wind_change.fit)
 ```
+
 
