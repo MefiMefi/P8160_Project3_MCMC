@@ -1,0 +1,46 @@
+---
+title: |
+  | P8160 - Project 3
+  | Baysian modeling of hurricane
+author: |
+  | Renjie Wei, Hao zheng, Xinran Sun
+  | Wentong Liu
+date: "2022-05-09"
+output:
+  beamer_presentation:
+    theme: "default"
+    fonttheme: "structurebold"
+    incremental: false
+    latex_engine: xelatex
+header-includes:
+- \usepackage{caption}
+- \captionsetup[figure]{labelformat=empty}
+---
+
+# Introduction
+
+# EDA
+
+# Joint posterior
+
+
+\begin{align*}
+\pi(\boldsymbol{\Theta} |\boldsymbol{Y})\\
+& =\pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \boldsymbol{\Sigma}\mid Y)\\
+&\propto \prod\limits_{i=1}^{n} f(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 )\prod\limits_{i=1}^{n}\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma})P(\sigma^2)P(\boldsymbol{\mu})P(\boldsymbol{\Sigma}^{-1})\\
+&\propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\} \\ 
+& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
+\end{align*}
+
+
+# MCMC algorithm
+
+# Conditional Posterior
+
+* To apply MCMC using Gibbs sampling, we need to find conditional posterior distribution of each parameter, then we can implement Gibbs sampling on these conditional posterior distributions.
+
+    + $\pi(\textbf{B} | \boldsymbol{Y}, \boldsymbol{\mu}^\top, \sigma^2, \boldsymbol{\Sigma})$ 
+
+    + $\pi(\sigma^2|\boldsymbol{Y},\textbf{B}^\top, \boldsymbol{\mu}^\top,\boldsymbol{\Sigma})$
+    
+    + 
