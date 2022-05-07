@@ -1,0 +1,32 @@
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(caret)
+library(corrplot)
+library(plotmo)
+```
+
+```{r}
+## Import Data
+dat = read.csv("hurricanoutcome2.csv")
+dat = subset(dat, select = -HurricanID)
+dat$Deaths = gsub(",","",dat$Deaths)
+dat$Damage = gsub("\\$", "", dat$Damage)
+dat_q6 = dat %>% 
+  mutate(Damage = as.numeric(Damage),
+         Deaths = as.numeric(Deaths),
+         Season = as.numeric(Season),
+         Maxspeed = as.numeric(Maxspeed),
+         Month = as.factor(Month),
+         Nature = as.factor(Nature))
+str(dat_q6)
+```
+
+
+```{r}
+damage.fit = lm(Damage ~., data = dat_q6)
+summary(damage.fit)
+
+deaths.fit = glm(Deaths ~ ., family=poisson(link=log), data = dat_q6)
+summary(deaths.fit)
+```
