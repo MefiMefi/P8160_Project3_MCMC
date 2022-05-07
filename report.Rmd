@@ -15,8 +15,11 @@ knitr::opts_chunk$set(echo = TRUE)
 hurrican703.csv collected the track data of 702 hurricanes in  the North Atlantic area from 1950 to 2013. For all the storms, their location (longitude \& latitude) and maximum wind speed were recorded every 6 hours. The data includes the following variables 
 
 1. **ID**:  ID of the hurricans
-2. **Season**: In which \textbf{year} the hurricane occurred 
+
+2. **Season**: In which \textbf{year} the hurricane occurred
+
 3. **Month**: In which \textbf{month} the hurricane occurred 
+
 4. **Nature**:  Nature of the hurricane 
   + ET: Extra Tropical
   + DS: Disturbance
@@ -24,18 +27,59 @@ hurrican703.csv collected the track data of 702 hurricanes in  the North Atlanti
   + SS: Sub Tropical
   + TS: Tropical Storm
 5. **time**: dates and time of the record  
+
 6. **Latitude** and **Longitude**:  The location of  a hurricane check point 
+
 7. **Wind.kt**  Maximum wind speed (in Knot) at each check point 
 
 From the original dataset, we built a new dataset with contains five more variables, including:
 
-1. **Wind_prev**: wind speed at 6 hours ago, 
-2. **Wind_prev_prev**: wind speed at 12 hours ago, 
-3. **Lat_change**: latitude change compared to 6 hours earlier, 
-4. **Long_change**: longitude change compared to 6 hours earlier, and 
-5. **Wind_change**: wind speed change at 6 hours earlier compared to 12 hours earlier. 
+1. **Wind_prev**: wind speed at 6 hours ago
+
+2. **Wind_prev_prev**: wind speed at 12 hours ago
+
+3. **Lat_change**: latitude change compared to 6 hours earlier
+
+4. **Long_change**: longitude change compared to 6 hours earlier
+
+5. **Wind_change**: wind speed change at 6 hours earlier compared to 12 hours earlier
 
 These variables will help us to build the model in the following part.
+
+The $hurricanoutcome2.csv$ recorded the damages and death caused by 46 hurricanes in the U.S, and some features extracted from the hurricane records. The variables include:
+
+1. **ID**: ID of the hurricans
+    
+2. **Season**: In which \textbf{year} the hurricane occurred 
+    
+3. **Month**: In which \textbf{month} the hurricane occurred 
+    
+4. **Nature**: Nature of the hurricane 
+    + ET: Extra Tropical
+    + DS: Disturbance
+    + NR: Not Rated
+    + SS: Sub Tropical
+    + TS: Tropical Storm
+      
+5. **Damage**: Financial loss (in Billion U.S. dollars) caused by hurricanes
+    
+6. **Deaths**: Number of death caused by hurricanes
+    
+7. **Maxspeed**: Maximum recorded wind speed of the hurricane
+    
+8. **Meanspeed**: average  wind speed of the hurricane
+    
+9. **Maxpressure**: Maximum recorded central pressure of the hurricane
+    
+10. **Meanpressure**: average central pressure of the hurricane
+    
+11. **Hours**: Duration of the hurricane in hours 
+    
+12. **Total.Pop**: Total affected population   
+    
+13. **Percent.Poor**: % affected population that reside in low GDP countres (i.e. GDP per Capita $<=$ 10,000)  
+    
+14. **Percent.USA**: % affected population that reside in the United States  
 
 ## EDA
 

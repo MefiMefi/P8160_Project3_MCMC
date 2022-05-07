@@ -3,7 +3,7 @@ title: |
   | P8160 - Project 3
   | Baysian modeling of hurricane
 author: |
-  | Renjie Wei, Hao zheng, Xinran Sun
+  | Renjie Wei, Hao Zheng, Xinran Sun
   | Wentong Liu
 date: "2022-05-09"
 output:
@@ -18,8 +18,105 @@ header-includes:
 ---
 
 # Introduction
+* Hurricanes can result in death and economical damage
+* There is an increasing desire to predict the speed and damage of the hurricanes
+* Use Bayesian Model and Markov Chain Monte Carlo algorithm to 
+  + Predict the wind speed of hurricanes
+  + Study how hurricanes is related to death and financial loss
 
-# EDA
+# Dataset
+
+* Hurrican703 dataset: 22038 observations $\times$ 8 variables 
+  + 702 hurricanes in  the North Atlantic area in year 1950-2013
+  
+* Processed dataset: add 5 more variables into hurrican703
+
+* Hurricanoutcome2 dataset: 43 observations $\times$ 14 variables
+
+# EDA - Count of Hurricanes in Each Month
+
+```{r, include = FALSE}
+library(ggplot2)
+dt= read.csv("./hurrican703.csv")
+library(data.table)
+dt <- as.data.table(dt)
+summary(dt)
+
+library(tidyverse)
+dt_long <- dt %>%
+    dplyr::group_by(ID) %>% 
+    mutate(Wind_prev = lag(Wind.kt, 1),
+           Lat_change = Latitude - lag(Latitude, 1),
+           Long_change = Longitude - lag(Longitude, 1),
+           Wind_prev_prev = lag(Wind.kt, 2)) %>% 
+    mutate(Wind_change = Wind_prev - Wind_prev_prev)
+```
+
+```{r, echo=FALSE}
+storms_month_name = distinct(group_by(select(dt_long, Month, ID), Month))
+
+storms_month_name %>% 
+  dplyr::group_by(Month) %>% 
+  mutate(Month =  factor(Month, levels = month.name)) %>%  
+  ggplot(aes(x = Month)) +
+  geom_bar()
+```
+
+# EDA - Average Speed (knot) of Hurricanes in Each Month
+
+```{r, echo=FALSE}
+dt_long %>% 
+  dplyr::group_by(Month) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Month, avg_speed) %>% 
+  mutate(Month =  factor(Month, levels = month.name))%>% 
+  ggplot(aes(x = Month, y = avg_speed)) +
+  geom_point() +
+  scale_y_continuous("Average Speed (knot)")
+```
+
+# EDA - ount of Hurricanes in Each Year
+
+```{r, echo=FALSE}
+storms_season_name = distinct(group_by(select(dt_long, Season, ID), Season))
+ggplot(data = storms_season_name) + 
+  geom_bar(aes(x = Season)) +
+  scale_x_continuous("Year")
+```
+
+# EDA - CAverage Speed (knot) of Hurricanes in Each Year
+
+```{r, echo=FALSE}
+dt_long %>% 
+  dplyr::group_by(Season) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Season, avg_speed) %>% 
+  ggplot(aes(x = Season, y = avg_speed)) +
+  geom_point() +
+  geom_smooth(method = "loess") +
+  scale_y_continuous("Average Speed (knot)") +
+  scale_x_continuous("Year") 
+```
+
+# EDA - Count of Hurricanes in Each Nature
+
+```{r, echo=FALSE}
+storms_nature_name = distinct(group_by(select(dt_long, Nature, ID), Nature))
+ggplot(data = storms_nature_name) + 
+  geom_bar(aes(x = Nature))
+```
+
+# EDA - Average Speed (knot) of Hurricanes in Each Nature
+
+```{r, echo=FALSE}
+dt_long %>% 
+  dplyr::group_by(Nature) %>% 
+  mutate(avg_speed = mean(Wind.kt)) %>% 
+  distinct(Nature, avg_speed) %>% 
+  ggplot(aes(x = Nature, y = avg_speed)) +
+  geom_point() +
+  scale_y_continuous("Average Speed (knot)")
+```
 
 # Joint posterior
 
