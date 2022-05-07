@@ -1,0 +1,81 @@
+---
+title: "model predict"
+author: "Shengzhi Luo"
+date: "05/05/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(tidyverse)
+library(dplyr)
+library(Metrics)
+```
+
+```{r,include=FALSE}
+load("~/Documents/P8160 TPCS IN ADVNCD STAT COMPUTING/P8160_Project3_MCMC/MCMC.res.2.RData")
+load("~/Documents/P8160 TPCS IN ADVNCD STAT COMPUTING/P8160_Project3_MCMC/dt_test_id.RData")
+```
+
+
+```{r}
+beta.res.plot = NULL
+for (i in 6164:10000) {
+    B.res = MCMC.res.2$B[[i]]
+    B.res = as.data.frame(B.res)
+    B.res = colMeans(B.res)
+    beta.res.plot = rbind(beta.res.plot, B.res)
+}
+sigma.res.plot = NULL
+for (i in 6164:10000) {
+    sigma.res = MCMC.res.2$sigma2[[i]]
+    sigma.res = as.data.frame(sigma.res)
+    sigma.res.plot = rbind(sigma.res.plot, sigma.res)
+}
+```
+
+
+```{r}
+dt_res = dt_test_id %>% 
+  dplyr::select(Wind.kt,intercept,Wind_prev,Lat_change, Long_change, Wind_change,ID) %>%
+  mutate(beta_0 = beta.res.plot[,1],
+         beta_1 = beta.res.plot[,2],
+         beta_2 = beta.res.plot[,3],
+         beta_3 = beta.res.plot[,4],
+         beta_4 = beta.res.plot[,5],
+         sigma = sigma.res.plot[,1]) %>% 
+  mutate(Wind_kt_pred = beta_0*intercept+beta_1*Wind_prev
+         +beta_2*Lat_change+beta_3*Long_change+beta_4*Wind_change) %>%
+  group_by(ID) %>% 
+  mutate(r_square = 1-(sum((Wind_kt_pred-Wind.kt)^2))/(sum((Wind.kt-mean(Wind.kt))^2)),
+         rmse = rmse(Wind.kt,Wind_kt_pred))
+```
+
+```{r}
+  dt_rmse=
+  dt_res %>% 
+  dplyr::select(ID, r_square, rmse) %>% 
+  distinct() %>% 
+  mutate(r_square = round(r_square, 3),
+         rmse = round(rmse,3)) %>% 
+  filter(r_square > 0 && r_square < 1)
+head(dt_rmse,20) %>% knitr::kable()
+```
+
+```{r}
+dt_res %>% filter(ID %in% c("DOG.1950","MITCH.1998","GINGER.1971","MARILYN.1995")) %>% 
+  mutate(index = 1:n()) %>%
+  ggplot(aes(y = Wind.kt, x = index))+
+  geom_line(aes(color = "Actual Wind Speed"))+
+  geom_line(aes(y = Wind_kt_pred, color = "Predicted Wind Speed"))+
+  facet_wrap(.~ID, nrow = 2, scales = "free")+
+  theme_classic()+
+  labs(x = "Index",
+       y = "Wind Speed",
+       title = "Actual Wind Speed vs. Predicted Wind Speed")
+```
+
+
+
+
