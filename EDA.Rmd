@@ -1,6 +1,6 @@
 ---
 title: "EDA"
-author: "Renjie Wei"
+author: "Renjie Wei, Xinran Sun"
 date: '2022-05-03'
 output: html_document
 ---
