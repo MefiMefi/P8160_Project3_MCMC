@@ -16,18 +16,19 @@ load("MCMC.res.2.RData")
 
 ```{r ols_try}
 load("dt_train.RData")
-ols.beta.res = NULL
-for(i in 1:length(dt_train)){
-    lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
-    ols.beta.res = rbind(ols.beta.res, coef(lm.mdl))
-}
-
-par(mfrow = c(1, 5))
-hist(ols.beta.res[,1])
-hist(ols.beta.res[,2])
-hist(ols.beta.res[,3])
-hist(ols.beta.res[,4])
-hist(ols.beta.res[,5])
+load("dt_test.RData")
+#ols.beta.res = NULL
+#for(i in 1:length(dt_train)){
+#    lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
+#    ols.beta.res = rbind(ols.beta.res, coef(lm.mdl))
+#}
+#
+#par(mfrow = c(1, 5))
+#hist(ols.beta.res[,1])
+#hist(ols.beta.res[,2])
+#hist(ols.beta.res[,3])
+#hist(ols.beta.res[,4])
+#hist(ols.beta.res[,5])
 ```
 
 
@@ -113,4 +114,24 @@ for (i in 5001:10000) {
 
 beta.res.postmean = beta.res.post/ 5000
 ```
+
+```{r}
+load("ID_in.RData")
+```
+
+```{r append_id}
+dt_train_id = NULL
+dt_test_id = NULL
+for (i in 1:length(dt_train)){
+    temp_train = dt_train[[i]]
+    temp_test = dt_test[[i]]
+    temp_train$ID = ID_in[[i]]
+    temp_test$ID = ID_in[[i]]
+    dt_train_id = rbind(dt_train_id, temp_train)
+    dt_test_id = rbind(dt_test_id, temp_test)
+}
+save(dt_train_id, file = "dt_train_id.RData")
+save(dt_test_id, file = "dt_test_id.RData")
+```
+
 
