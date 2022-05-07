@@ -25,16 +25,17 @@ dt_wind =
     mutate(intercept = 1) %>% 
     dplyr::select(c("ID", "Wind.kt", "intercept", "Wind_prev", "Lat_change", "Long_change", "Wind_change")) %>%
     drop_na()
-# 700 after drop_na
+
+# 699 after drop_na
 IDs <- unique(dt_wind$ID)
 
-# 694 observations >=5
+# 684 observations >=5
 ID_in <- NULL
 for (i in 1:length(IDs)) {
     dt_temp =  dt_wind[which(dt_wind$ID == IDs[i]),][,2:7]
     m = nrow(dt_temp)
     # need to drop observations less than 5
-    if (m <= 5){
+    if (m <= 3){
         next
     }else{
         ID_in = c(ID_in,  IDs[i])
@@ -45,21 +46,23 @@ dt_mtx_full = dt_wind %>% filter(ID %in% ID_in) %>% nest() %>% pull(data)
 
 dt_mtx_train <- list(NULL)
 dt_mtx_test <- list(NULL)
-# partitioning dataset based on id
-set.seed(20228160)
-ID_train = sample(ID_in, ceiling(0.8 * length(ID_in)))
-ID_test = NULL
 
-for(i in 1:length(ID_in)){
-    if(ID_in[i] %in% ID_train){
-       next
-    }else{
-        ID_test = c(ID_test, ID_in[i]) 
-    }
-}
-
-dt_mtx_train = dt_wind %>% filter(ID %in% ID_train) %>% nest() %>% pull(data)
-dt_mtx_test = dt_wind %>% filter(ID %in% ID_test) %>% nest() %>% pull(data)
+# partitioning dataset based on id 
+# ##########dont do it!###########
+#set.seed(20228160)
+#ID_train = sample(ID_in, ceiling(0.8 * length(ID_in)))
+#ID_test = NULL
+#
+#for(i in 1:length(ID_in)){
+#    if(ID_in[i] %in% ID_train){
+#       next
+#    }else{
+#        ID_test = c(ID_test, ID_in[i]) 
+#    }
+#}
+#
+#dt_mtx_train = dt_wind %>% filter(ID %in% ID_train) %>% nest() %>% pull(data)
+#dt_mtx_test = dt_wind %>% filter(ID %in% ID_test) %>% nest() %>% pull(data)
 
 #for (i in 1:length(ID_train)) {
 #    dt_temp = dt_wind[which(dt_wind$ID == ID_train[i]),][,2:7]
@@ -160,7 +163,7 @@ post.mu <- function(B, Sigma){
 ```
 
 ```{r MCMC_Gibbs}
-MCMC.Gibbs <- function(dt, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
+MCMC.Gibbs <- function(dt, init.B, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
     B.res = list()
     sigma2.res = list()
     Sigma.res = list()
@@ -169,10 +172,10 @@ MCMC.Gibbs <- function(dt, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
     # initialize B
     init.Bstuff = post.B(dt, init.muvec, init.sigma2, init.Sigma)
     
-    cur.stuff = init.Bstuff
-    cur = list(B = init.Bstuff$B, sigma2 = init.sigma2, muvec = init.muvec, Sigma = init.Sigma ,RSS = init.Bstuff$RSS)
+    cur.stuff = NULL
+    cur = list(B = init.B, sigma2 = init.sigma2, muvec = init.muvec, Sigma = init.Sigma ,RSS = init.Bstuff$RSS)
     
-    B.res[[1]] = cur$B
+    B.res[[1]] = init.B
     sigma2.res[[1]] = cur$sigma2
     Sigma.res[[1]] = cur$Sigma
     muvec.res[[1]] = cur$muvec
@@ -208,29 +211,40 @@ MCMC.Gibbs <- function(dt, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
 }
 ```
 
+```{r ols_beta}
+ols.beta.res = NULL
+for(i in 1:length(dt_train)){
+    lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
+    ols.beta.res = rbind(ols.beta.res, coef(lm.mdl))
+}
+ols.B = as.matrix(ols.beta.res)
+```
+
+
 ```{r test_mcmc}
 # run 10 cycles
-#test.MCMC.res = MCMC.Gibbs(dt_mtx_train, init.muvec = c(1,2,3,4,5), init.sigma2 = 1, init.Sigma = diag(0.3, 5, 5), max.iter = 100)
+#test.MCMC.res = MCMC.Gibbs(dt_train, init.B = ols.B  ,init.muvec = c(1,2,3,4,5), init.sigma2 = 1, init.Sigma = diag(0.3, 5, 5), max.iter = 10)
 ```
 
 ```{r run_MCMC, cache=T, eval=FALSE}
 # train set based on ID
-MCMC.res = MCMC.Gibbs(dt_mtx_train, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
-save(MCMC.res,file = "MCMC.res.RData")
+#MCMC.res = MCMC.Gibbs(dt_mtx_train, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = #diag(c(1,2,3,4,5)))
+#save(MCMC.res,file = "MCMC.res.RData")
 #finished
 
 # train set within each hurricane
-MCMC.res.2 = MCMC.Gibbs(dt_train, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
+MCMC.res.2 = MCMC.Gibbs(dt_train, init.B = ols.B, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
 save(MCMC.res.2,file = "MCMC.res.2.RData")
 ```
 
 ```{r}
-save(dt_mtx_train,file = "dt_mtx_train.RData")
-save(dt_mtx_test,file = "dt_mtx_test.RData")
+#save(dt_mtx_train,file = "dt_mtx_train.RData")
+#save(dt_mtx_test,file = "dt_mtx_test.RData")
 save(dt_train,file = "dt_train.RData")
 save(dt_test,file = "dt_test.RData")
 ```
 
 ```{r}
+save(ID_in, file = "ID_in.RData")
 ```
 

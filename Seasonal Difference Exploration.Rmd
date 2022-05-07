@@ -39,7 +39,8 @@ for (i in 1:length(IDs)) {
 dt_mtx_full = dt_wind %>% filter(ID %in% ID_in)
 
 dt_season <- dt_mtx_full[!duplicated(dt_mtx_full$ID),] %>% 
-  select(ID, Season, Month, Nature)
+  select(ID, Season, Month, Nature) %>% 
+  mutate(Month = factor(Month, levels = month.name))
 
 # use posterior mean of beta as our final Bayesian model coefficients
 beta.res.post = matrix(rep(0,694*5), 694, 5)
