@@ -70,6 +70,8 @@ plot(mu.res.plot[,2],type = "l", main = "Trace plot of mu1")
 plot(mu.res.plot[,3],type = "l", main = "Trace plot of mu2")
 plot(mu.res.plot[,4],type = "l", main = "Trace plot of mu3")
 plot(mu.res.plot[,5],type = "l", main = "Trace plot of mu4")
+xtick<-seq(5001, 10000, by=1000)
+axis(side=1, at=xtick, labels = FALSE)
 
 par(mfrow = c(2, 5))
 hist(beta.res.plot[,1], main = "Histogram plot of beta0")
@@ -85,22 +87,55 @@ hist(mu.res.plot[,4], main = "Histogram plot of mu3")
 hist(mu.res.plot[,5], main = "Histogram plot of mu4")
 ```
 
+```{r tidy_df}
+beta.plot.df = beta.res.plot %>% as_tibble() %>% 
+    mutate(iter = seq(5001:10000), type = "beta")
+mu.plot.df = mu.res.plot %>% as_tibble() %>% 
+    mutate(iter = seq(5001:10000), type = "mu")
+plot.df = rbind(beta.plot.df, mu.plot.df)
+```
+```{r tidy_plots}
+library(ggplot2)
+plot.df %>% pivot_longer(1:5, names_to = "varname", values_to = "value") %>% 
+    ggplot(aes(x = iter, y = value, group = type, color = varname)) + 
+    geom_line() + 
+    facet_grid(type~varname, scales = "free", space = "free")
+    
+```
+
 
 ```{r}
-var(beta.res.plot[,1])
-var(beta.res.plot[,2])
-var(beta.res.plot[,3])
-var(beta.res.plot[,4])
-var(beta.res.plot[,5])
+# sample param inference
+var.beta0 = var(beta.res.plot[,1])
+var.beta1 = var(beta.res.plot[,2])
+var.beta2 = var(beta.res.plot[,3])
+var.beta3 = var(beta.res.plot[,4])
+var.beta4 = var(beta.res.plot[,5])
 ```
 
 ```{r}
-var(mu.res.plot[,1])
-var(mu.res.plot[,2])
-var(mu.res.plot[,3])
-var(mu.res.plot[,4])
-var(mu.res.plot[,5])
+# population param inference
+var.mu0 =var(mu.res.plot[,1])
+var.mu1 =var(mu.res.plot[,2])
+var.mu2 =var(mu.res.plot[,3])
+var.mu3 =var(mu.res.plot[,4])
+var.mu4 =var(mu.res.plot[,5])
 ```
+
+```{r summary_param_tab}
+param_summary = tibble(
+    variable_name = names(beta.res.postmean[1:5]),
+    mean_beta = colMeans(beta.res.postmean[,1:5]),
+    var_beta = c(var.beta0, var.beta1, var.beta2, var.beta3, var.beta4),
+    ci_beta_lower = mean_beta + qnorm(.025)*var_beta,
+    ci_beta_upper = mean_beta + qnorm(.975)*var_beta,
+    mu = colMeans(mu.res.plot),
+    var_mu = c(var.mu0, var.mu1, var.mu2, var.mu3, var.mu4),
+    ci_mu_lower = mu + qnorm(.025)*var_mu,
+    ci_mu_upper = mu + qnorm(.975)*var_mu,
+)
+```
+
 
 ```{r extract_each_beta}
 # use posterior mean of beta as our final Bayesian model coefficients
@@ -132,6 +167,10 @@ for (i in 1:length(dt_train)){
 }
 save(dt_train_id, file = "dt_train_id.RData")
 save(dt_test_id, file = "dt_test_id.RData")
+
+beta.res.postmean$ID = ID_in
+row.names(beta.res.postmean) = NULL
+save(beta.res.postmean, file = "beta.res.postmean.RData")
 ```
 
 
