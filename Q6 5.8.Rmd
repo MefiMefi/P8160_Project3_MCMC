@@ -70,7 +70,7 @@ data_res = data_res %>%
 
 Coef_table = data_res %>% 
   select(id, intercept, beta1, beta2, beta3, beta4) %>% 
-  knitr::kable()
+  knitr::kable(digits = 3, col.names = c("ID", "$\\beta_0$", "$\\beta_1$", "$\\beta_2$", "$\\beta_3$", "$\\beta_4$"), escape = F)
 
 Coef_table %>% head(10)
 ```
@@ -81,8 +81,16 @@ data_damage = data_res %>%
 str(data_damage)
 
 require(broom)
-damage.fit = glm(Damage ~., data = data_damage, family = "poisson")
-damage.tidy = tidy(damage.fit) %>% na.omit()
+damage.fit = glm(Damage ~., data = data_damage, family = "gaussian")
+damage.tidy = tidy(damage.fit) %>% 
+    mutate(
+        term = case_when(term == "intercept"~"$\\beta_0$",
+                         term == "beta1"~"$\\beta_1$",
+                         term == "beta2"~"$\\beta_2$",
+                         term == "beta3"~"$\\beta_3$",
+                         term == "beta4"~"$\\beta_4$",
+                         TRUE ~ term)
+    ) %>% na.omit()
 
 df_total = data.frame()
 coef_res = function(table){
@@ -92,10 +100,10 @@ coef_res = function(table){
     i = i + 1}
     else{i = i +1}
   }
-  print(df_total)
+  return(df_total)
 }
 
-coef_res(damage.tidy)
+coef_res(damage.tidy) %>% knitr::kable(digits = 3)
 
 ```
 
@@ -103,10 +111,18 @@ coef_res(damage.tidy)
 data_deaths = data_res %>% 
   select(-c(id, Damage))
 
-deaths.fit = glm(Deaths ~ ., data = data_deaths, family = "poisson")
+deaths.fit = glm(Deaths ~ ., data = data_deaths, family = "poisson", offset = log(Total.Pop))
 
-deaths.tidy = tidy(deaths.fit) %>% na.omit()
-coef_res(deaths.tidy)
+deaths.tidy = tidy(deaths.fit) %>% 
+    mutate(
+        term = case_when(term == "intercept"~"$\\beta_0$",
+                         term == "beta1"~"$\\beta_1$",
+                         term == "beta2"~"$\\beta_2$",
+                         term == "beta3"~"$\\beta_3$",
+                         term == "beta4"~"$\\beta_4$",
+                         TRUE ~ term)
+    ) %>% na.omit()
+coef_res(deaths.tidy)%>% knitr::kable(digits = 3)
 ```
 
 
