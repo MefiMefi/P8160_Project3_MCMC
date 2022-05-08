@@ -236,10 +236,15 @@ mu0 = colMeans(ols.B,na.rm = T)
 sigmasq0 = mean(ols.residual.res)
 
 # run 10 cycles
-test.MCMC.res = MCMC.Gibbs(dt_train, init.B = ols.B  ,init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)), max.iter = 10)
+#test.MCMC.res = MCMC.Gibbs(dt_train, init.B = ols.B  ,init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)), max.iter = 10)
 
 MCMC.res.2 = MCMC.Gibbs(dt_train, init.B = ols.B, init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)))
 save(MCMC.res.2,file = "MCMC.res.2.RData")
+
+bad.B = matrix(seq(1:(5*697)), 697)
+bad.mu = colMeans(bad.B)
+MCMC.res.bad =  MCMC.Gibbs(dt_train, init.B = bad.B, init.muvec = bad.mu, init.sigma2 = sigmasq0*1000, init.Sigma = diag(c(1000,50,1000,500,100)), max.iter = 10000)
+save(MCMC.res.bad,file = "MCMC.res.bad.RData")
 ```
 
 ```{r}
