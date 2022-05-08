@@ -292,57 +292,7 @@ sigma_summary %>% mutate(
 ```
 
 
-The posterior estimates of $\boldsymbol{\mu}$ reflects the population average of our model parameters. For $\boldsymbol{\mu}_0$, which is the parameter of the intercept, 
-
-```{r loglik_functions, echo=FALSE}
-# betavec: 1*5
-# sigma2: 1*1
-# mu: 1*5
-# Sigma: 5*5
-
-# d = 5
-# n = 702
-
-
-loglik_sigma2 <- function(sigma2){
-    if (sigma2 <= 0) {
-        return(-Inf)
-    } else {
-        return(log(1/sigma2^2))  
-    }
-    
-}
-
-loglik_Sigma <- function(Sigma, d){
-    if (min(eigen(Sigma)$values) <= 0) {
-        return(-Inf)
-    } else {
-        loglik = log(det(Sigma)^(-(d+1))*exp(-(1/2)*solve(Sigma)))
-        return(loglik)
-    }
-}
-
-# log likelihood for y given a specific hurricane's data given sigma2 and betavec
-loglik_Y <- function(y, X, betavec, sigma2){
-    m = length(y)
-    loglik = (2*pi*sigma2^2)^(-(m/2))*exp(-(1/2)*t(X %*% t(betavec)) %*% solve(diag(sigma2, m)) %*% (X %*% t(betavec))) 
-    loglik = log(loglik)
-    return(loglik)
-    
-}
-
-# log likelihood for betavec given a specific hurricane's mu and Sigma
-
-loglik_betavec <- function(betavec, mu, Sigma){
-    if (min(eigen(Sigma)$values) <= 0) {
-        return(-Inf)
-    } else {
-        loglik = log(det(2*pi*Sigma)^(-(1/2))*exp(-(1/2)*(betavec - mu) %*% solve(Sigma) %*% t(betavec - mu)))
-        return(loglik)
-    }
-}
-
-```
+The posterior estimates of $\boldsymbol{\mu}$ reflects the population average of our model parameters. For $\boldsymbol{\mu}_0$, which is the parameter of the intercept, it tells us the average wind speed of all hurricanes. $\boldsymbol{\mu}_1$ is the coefficient associated with the previous wind speed, the estimates of it is 0.912 which is positive, means that an increase in the previous wind speed will causes a higher speed for that in the next time. $\boldsymbol{\mu}_2$ and $\boldsymbol{\mu}_3$ are the coefficients associated with the change in latitude and longitude of the hurricane, it seems that an increase in the change of latitude is associated with the increments in wind speed, on the other hand, an increase in the change of longitude is associated with the decrements in wind speed. Finally, the estimated $\boldsymbol{\mu}_4$ is 0.485 > 0, indicating that an increase in the change of wind speed will cause an increase in future wind speed.
 
 
 
