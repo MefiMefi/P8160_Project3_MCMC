@@ -8,7 +8,7 @@ author: |
 date: "2022-05-09"
 output:
   beamer_presentation:
-    theme: "default"
+    theme: "Boadilla"
     fonttheme: "structurebold"
     incremental: false
     latex_engine: xelatex
@@ -179,7 +179,8 @@ $$
 
 $$
 \begin{aligned}
-\pi(\boldsymbol{\Theta} |\boldsymbol{Y}) & =\pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \boldsymbol{\Sigma}\mid Y) \propto \underbrace{\prod\limits_{i=1}^{n} f(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 )}_{\text{likelihood of } \boldsymbol{Y}}\underbrace{\prod\limits_{i=1}^{n}\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma})}_{\text{distribution of }\textbf{B}}\underbrace{P(\sigma^2)P(\boldsymbol{\mu})P(\boldsymbol{\Sigma}^{-1})}_{\text{priors}}\\
+\pi(\boldsymbol{\Theta} |\boldsymbol{Y}) & =\pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \boldsymbol{\Sigma}\mid Y) \\
+&\propto \underbrace{\prod\limits_{i=1}^{n} f(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 )}_{\text{likelihood of } \boldsymbol{Y}}\underbrace{\prod\limits_{i=1}^{n}\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma})}_{\text{distribution of }\textbf{B}}\underbrace{P(\sigma^2)P(\boldsymbol{\mu})P(\boldsymbol{\Sigma}^{-1})}_{\text{priors}}\\
 &\propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\} \\ 
 & \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \\
 &\times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
@@ -237,7 +238,7 @@ The update of parameters is component wise, at $(t+1)^\text{th}$ step, updating 
 
 # MCMC Results
 
-# Details
+## Details
 
 - 10000 iterations
 
