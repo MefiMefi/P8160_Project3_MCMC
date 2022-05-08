@@ -99,7 +99,8 @@ $$
 \begin{aligned}
 \pi(\boldsymbol{\Theta} |\boldsymbol{Y}) =\pi(\textbf{B}^\top, \boldsymbol{\mu}^\top, \sigma^2, \boldsymbol{\Sigma}\mid Y) &\propto \prod\limits_{i=1}^{n} f(\boldsymbol{Y}_i\mid\boldsymbol{\beta}_i,  \sigma^2 )\prod\limits_{i=1}^{n}\pi(\boldsymbol{\beta}_i \mid \boldsymbol{\mu},  \boldsymbol{\Sigma})P(\sigma^2)P(\boldsymbol{\mu})P(\boldsymbol{\Sigma}^{-1})\\
 &\propto \prod_{i=1}^n \Big\{(2\pi\sigma^2)^{-m_i/2} \exp\big\{-\frac{1}{2}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)^\top (\sigma^2 I)^{-1}(\boldsymbol{Y}_i - \boldsymbol{X}_i\boldsymbol{\beta}_i^\top)\big\}\Big\} \\ 
-& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
+& \times \prod_{i=1}^n \Big\{\det(2\pi\boldsymbol{\Sigma})^{-\frac{1}{2}} \exp\big\{-\frac{1}{2}(\boldsymbol{\beta}_i - \boldsymbol{\mu}) \boldsymbol{\Sigma}^{-1}(\boldsymbol{\beta}_i - \boldsymbol{\mu})^\top\big\}\Big\} \\
+&\times \frac{1}{\sigma^2} \times \det(\boldsymbol{\boldsymbol{\Sigma}})^{-(d+1)} \exp\big\{-\frac{1}{2}\boldsymbol{\Sigma}^{-1}\big\}
 \end{aligned}
 $$
 
@@ -236,35 +237,62 @@ For initial value of $\boldsymbol{\Sigma}$, we just set it to a simple diagonal 
 
 ### MCMC Results
 
-#### Trace plots
+#### Model Convergence
 
-```{r trace_mcmc, echo=FALSE, fig.cap="Trace plots of selected parameters, based on 10000 MCMC sample", out.width = '90%', fig.align='center'}
+The figures below show the estimates of each parameters over 10000 iterations. From the trace plots below, we can see that each parameters converge quickly. We take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. Figure display the histogram of parameters based on the last 5000 MCMC samples. From the histograms, we found that for $\boldsymbol{\beta}_i$ and $\boldsymbol{\mu}$, the distributions are relatively normal. However, we also found some skewness in the distributions of $\boldsymbol{\Sigma}$, e.g. $\boldsymbol{\Sigma}_{11}$, $\boldsymbol{\Sigma}_{12}$, $\boldsymbol{\Sigma}_{33}$ and $\boldsymbol{\Sigma}_{44}$.
+
+```{r trace_mcmc, echo=FALSE, fig.cap="Trace plots of model parameters, based on 10000 MCMC sample", out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_trace.jpg")
 ```
 
-#### Histograms
+```{r trace_mcmc_s, echo=FALSE, fig.cap="Trace plots of variance parameters, based on 10000 MCMC sample", out.width = '80%', fig.align='center'}
+knitr::include_graphics("./plots/mcmc_trace_sigma.jpg")
+```
 
-```{r hist_mcmc, echo=FALSE, fig.cap="Histograms of selected parameters, based on last 5000 MCMC sample", out.width = '90%', fig.align='center'}
+
+```{r hist_mcmc, echo=FALSE, fig.cap="Histograms of model parameters, based on last 5000 MCMC sample", out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_hist.jpg")
 ```
 
-#### Estimates
+```{r hist_mcmc_s, echo=FALSE, fig.cap="Histograms of variance parameters, based on last 5000 MCMC sample", out.width = '80%', fig.align='center'}
+knitr::include_graphics("./plots/mcmc_hist_sigma.jpg")
+```
+
+\newpage
+
+#### Parameter Estimates
+
+As we stated above, we take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. 
+
+We use the posterior mean as the posterior estimates for each parameter, and the 95% confidence interval is derived based on empirical rule, since the distributions of parameters are almost normal. Notice that the estimates of $\textbf{B}$ including all $\boldsymbol{\beta}_i$'s for all hurricanes, to do the estimation and inference, we take the average value of all $\boldsymbol{\beta}_i$'s in each last 5000 MCMC iterations and then take the average of these results as the estimate of $\textbf{B}$. So the estimate of $\textbf{B}$ reflects the sample mean response on the change of the hurricane speed across the predictors. The following tables shows the posterior estimates of the parameters
 
 
 ```{r param_summary, echo = FALSE, warning=FALSE, message=FALSE}
 library(tidyverse)
+
 load("./param_summary.RData")
 param_summary %>% mutate(
     beta_CI = paste0("(", round(ci_beta_lower,4),",",round(ci_beta_upper,4),")"),
     mu_CI = paste0("(", round(ci_mu_lower,4),",",round(ci_mu_upper,4),")")
 ) %>% select(c("variable_name", "mean_beta", "var_beta", "beta_CI","mu", "var_mu","mu_CI")) %>% 
-    knitr::kable(digits = 4, col.names = c("Variables", "$\\bar\\beta_i$","Var($\\bar\\beta_i$)","95% CI of $\\bar\\beta_i$","$\\bar\\mu$","Var($\\bar\\mu$)","95% CI of $\\bar\\mu$"), escape = F)
+    knitr::kable(digits = 4, col.names = c("Variables", "$\\bar\\beta_i$","Var($\\bar\\beta_i$)","95% CI of $\\bar\\beta_i$","$\\bar\\mu$","Var($\\bar\\mu$)","95% CI of $\\bar\\mu$"), escape = F) 
+```
+
+\newpage
+
+```{r sigma_summary, echo = FALSE, warning=FALSE, message=FALSE}
+load("./sigma_summary.RData")
+sigma_summary %>% mutate(
+    CI = paste0("(", round(CI_L,4),",",round(CI_U,4),")")) %>% 
+    select(c("parameter", "estimates", "variance","CI")) %>% 
+    knitr::kable(digits = 4, col.names = c("Parameters", "Estimates","Variance","95% CI"), escape = F) 
+```
+
+```{r cov2cor}
 ```
 
 
-
-
-
+The posterior estimates of $\boldsymbol{\mu}$ reflects the population average of our model parameters. For $\boldsymbol{\mu}_0$, which is the parameter of the intercept, 
 
 ```{r loglik_functions, echo=FALSE}
 # betavec: 1*5
