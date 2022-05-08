@@ -251,8 +251,14 @@ knitr::include_graphics("./plots/mcmc_hist.jpg")
 #### Estimates
 
 
-```{r}
+```{r param_summary, echo = FALSE, warning=FALSE, message=FALSE}
+library(tidyverse)
 load("./param_summary.RData")
+param_summary %>% mutate(
+    beta_CI = paste0("(", round(ci_beta_lower,4),",",round(ci_beta_upper,4),")"),
+    mu_CI = paste0("(", round(ci_mu_lower,4),",",round(ci_mu_upper,4),")")
+) %>% select(c("variable_name", "mean_beta", "var_beta", "beta_CI","mu", "var_mu","mu_CI")) %>% 
+    knitr::kable(digits = 4, col.names = c("Variables", "$\\bar\\beta_i$","Var($\\bar\\beta_i$)","95% CI of $\\bar\\beta_i$","$\\bar\\mu$","Var($\\bar\\mu$)","95% CI of $\\bar\\mu$"), escape = F)
 ```
 
 

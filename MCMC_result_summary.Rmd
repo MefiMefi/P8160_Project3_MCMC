@@ -12,6 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```{r}
 library(tidyverse)
 load("MCMC.res.2.RData")
+load("MCMC.res.bad.RData")
 ```
 
 ```{r ols_try}
@@ -63,6 +64,38 @@ for (i in 2:10000) {
 }
 
 ```
+```{r}
+beta.res.plot.bad = NULL
+for (i in 1:10000) {
+    B.res = MCMC.res.bad$B[[i]]
+    B.res = as.data.frame(B.res)
+    B.res = colMeans(B.res, na.rm = T)
+    beta.res.plot.bad = rbind(beta.res.plot.bad, B.res)
+}
+
+sigma.res.plot.bad = NULL
+for (i in 1:10000) {
+    sigma.res = MCMC.res.bad$sigma2[[i]]
+    sigma.res = as.data.frame(sigma.res)
+    sigma.res.plot.bad = rbind(sigma.res.plot.bad, sigma.res)
+}
+
+mu.res.plot.bad = list(
+    intercept = 349,
+    Wind_prev = 1046,
+    Lat_change = 1743,
+    Long_change = 2440,
+    Wind_change = 3137
+)
+for (i in 2:10000) {
+    mu.res = MCMC.res.bad$muvec[[i]]
+    mu.res = as.data.frame(t(mu.res))
+    mu.res.plot.bad = rbind(mu.res.plot.bad, mu.res)
+}
+```
+
+
+
 ```{r plot_mc_chain}
 jpeg(file="./plots/mcmc_trace.jpg", width = 3200, height = 1800, quality = 100)
 par(mfrow = c(2, 5))
@@ -106,6 +139,48 @@ hist(mu.res.plot[5001:10000,5], main = bquote("Histogram plot of "~mu[4]), break
 dev.off()
 ```
 
+```{r bad_plots}
+par(mfrow = c(2, 5))
+plot(beta.res.plot.bad[,1],type = "l", main = bquote("Trace plot of "~ beta[0]), ylab = bquote(beta[0]))
+abline(v = 5001, col = 2, lty = 4)
+plot(beta.res.plot.bad[,2],type = "l", main = bquote("Trace plot of "~ beta[1]), ylab = bquote(beta[1]))
+abline(v = 5001, col = 2, lty = 4)
+plot(beta.res.plot.bad[,3],type = "l", main = bquote("Trace plot of "~ beta[2]), ylab = bquote(beta[2]))
+abline(v = 5001, col = 2, lty = 4)
+plot(beta.res.plot.bad[,4],type = "l", main = bquote("Trace plot of "~ beta[3]), ylab = bquote(beta[3]))
+abline(v = 5001, col = 2, lty = 4)
+plot(beta.res.plot.bad[,5],type = "l", main = bquote("Trace plot of "~ beta[4]), ylab = bquote(beta[4]))
+abline(v = 5001, col = 2, lty = 4)
+#plot(sigma.res.plot[,1],type = "l", main = "Trace plot of sigma2")
+plot(mu.res.plot.bad[,1],type = "l", main = bquote("Trace plot of "~ mu[0]), ylab = bquote(mu[0]))
+abline(v = 5001, col = 2, lty = 4)
+plot(mu.res.plot.bad[,2],type = "l", main = bquote("Trace plot of "~ mu[1]), ylab = bquote(mu[1]))
+abline(v = 5001, col = 2, lty = 4)
+plot(mu.res.plot.bad[,3],type = "l", main = bquote("Trace plot of "~ mu[2]), ylab = bquote(mu[2]))
+abline(v = 5001, col = 2, lty = 4)
+plot(mu.res.plot.bad[,4],type = "l", main = bquote("Trace plot of "~ mu[3]), ylab = bquote(mu[3]))
+abline(v = 5001, col = 2, lty = 4)
+plot(mu.res.plot.bad[,5],type = "l", main = bquote("Trace plot of "~ mu[4]), ylab = bquote(mu[4]))
+abline(v = 5001, col = 2, lty = 4)
+
+
+
+par(mfrow = c(2, 5))
+hist(beta.res.plot.bad[5001:10000,1], main = bquote("Histogram plot of "~beta[0]),breaks = 80, xlab = bquote(beta[0]))
+hist(beta.res.plot.bad[5001:10000,2], main = bquote("Histogram plot of "~beta[1]),breaks = 80, xlab = bquote(beta[1]))
+hist(beta.res.plot.bad[5001:10000,3], main = bquote("Histogram plot of "~beta[2]),breaks = 80, xlab = bquote(beta[2]))
+hist(beta.res.plot.bad[5001:10000,4], main = bquote("Histogram plot of "~beta[3]),breaks = 80, xlab = bquote(beta[3]))
+hist(beta.res.plot.bad[5001:10000,5], main = bquote("Histogram plot of "~beta[4]),breaks = 80, xlab = bquote(beta[4]))
+#hist(sigma.res.plot[,1], main = "Histogram plot of sigma2")
+hist(mu.res.plot.bad[5001:10000,1], main = bquote("Histogram plot of "~mu[0]), breaks = 80, xlab = bquote(mu[0]))
+hist(mu.res.plot.bad[5001:10000,2], main = bquote("Histogram plot of "~mu[1]), breaks = 80, xlab = bquote(mu[1]))
+hist(mu.res.plot.bad[5001:10000,3], main = bquote("Histogram plot of "~mu[2]), breaks = 80, xlab = bquote(mu[2]))
+hist(mu.res.plot.bad[5001:10000,4], main = bquote("Histogram plot of "~mu[3]), breaks = 80, xlab = bquote(mu[3]))
+hist(mu.res.plot.bad[5001:10000,5], main = bquote("Histogram plot of "~mu[4]), breaks = 80, xlab = bquote(mu[4]))
+
+```
+
+
 ```{r tidy_df}
 beta.plot.df = beta.res.plot %>% as_tibble() %>% 
     mutate(iter = seq(1:10000), type = "beta") %>% 
@@ -126,22 +201,40 @@ plot.df %>% pivot_longer(1:5, names_to = "varname", values_to = "value") %>%
 
 ```{r}
 # sample param inference
-var.beta0 = var(beta.res.plot[,1])
-var.beta1 = var(beta.res.plot[,2])
-var.beta2 = var(beta.res.plot[,3])
-var.beta3 = var(beta.res.plot[,4])
-var.beta4 = var(beta.res.plot[,5])
+var.beta0 = var(beta.res.plot[5001:10000,1])
+var.beta1 = var(beta.res.plot[5001:10000,2])
+var.beta2 = var(beta.res.plot[5001:10000,3])
+var.beta3 = var(beta.res.plot[5001:10000,4])
+var.beta4 = var(beta.res.plot[5001:10000,5])
 ```
 
 ```{r}
 # population param inference
-var.mu0 =var(mu.res.plot[,1])
-var.mu1 =var(mu.res.plot[,2])
-var.mu2 =var(mu.res.plot[,3])
-var.mu3 =var(mu.res.plot[,4])
-var.mu4 =var(mu.res.plot[,5])
+var.mu0 =var(mu.res.plot[5001:10000,1])
+var.mu1 =var(mu.res.plot[5001:10000,2])
+var.mu2 =var(mu.res.plot[5001:10000,3])
+var.mu3 =var(mu.res.plot[5001:10000,4])
+var.mu4 =var(mu.res.plot[5001:10000,5])
 ```
 
+
+```{r}
+# sample param inference
+var.beta0.bad = var(beta.res.plot.bad[5001:10000,1])
+var.beta1.bad = var(beta.res.plot.bad[5001:10000,2])
+var.beta2.bad = var(beta.res.plot.bad[5001:10000,3])
+var.beta3.bad = var(beta.res.plot.bad[5001:10000,4])
+var.beta4.bad = var(beta.res.plot.bad[5001:10000,5])
+```
+
+```{r}
+# population param inference
+var.mu0.bad =var(mu.res.plot.bad[5001:10000,1])
+var.mu1.bad =var(mu.res.plot.bad[5001:10000,2])
+var.mu2.bad =var(mu.res.plot.bad[5001:10000,3])
+var.mu3.bad =var(mu.res.plot.bad[5001:10000,4])
+var.mu4.bad =var(mu.res.plot.bad[5001:10000,5])
+```
 
 ```{r extract_each_beta}
 # use posterior mean of beta as our final Bayesian model coefficients
