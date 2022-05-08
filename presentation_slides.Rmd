@@ -4,7 +4,7 @@ title: |
   | Baysian modeling of hurricane
 author: |
   | Renjie Wei, Hao Zheng, Xinran Sun
-  | Wentong Liu
+  | Wentong Liu, Shengzhi Luo
 date: "2022-05-09"
 output:
   beamer_presentation:
@@ -141,3 +141,13 @@ dt_long %>%
     + $\pi(\sigma^2|\boldsymbol{Y},\textbf{B}^\top, \boldsymbol{\mu}^\top,\boldsymbol{\Sigma})$
     
     + 
+
+# Seasonal Difference Exploration
+```{r p5_sum, echo=FALSE, fig.cap="Fitted results of beta models", out.width = '90%', fig.align='center'}
+knitr::include_graphics("./p5_sum.jpg")
+```
+
+# Seasonal Difference Exploration
+```{r p5_sum_new, echo=FALSE, fig.cap="Fitted results of beta models for only the year variable", out.width = '90%', fig.align='center'}
+knitr::include_graphics("./p5_sum_new.jpg")
+```
