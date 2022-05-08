@@ -20,14 +20,14 @@ header-includes:
 # Introduction
 * Hurricanes can result in death and economical damage
 * There is an increasing desire to predict the speed and damage of the hurricanes
-* Use Bayesian Model and Markov Chain Monte Carlo algorithm to 
+* Use Bayesian Model and Markov Chain Monte Carlo algorithm
   + Predict the wind speed of hurricanes
   + Study how hurricanes is related to death and financial loss
 
 # Dataset
 
 * Hurrican703 dataset: 22038 observations $\times$ 8 variables 
-  + 702 hurricanes in  the North Atlantic area in year 1950-2013
+  + 702 hurricanes in the North Atlantic area in year 1950-2013 with tra
   
 * Processed dataset: add 5 more variables into hurrican703
 
@@ -75,7 +75,7 @@ dt_long %>%
   scale_y_continuous("Average Speed (knot)")
 ```
 
-# EDA - ount of Hurricanes in Each Year
+# EDA - Count of Hurricanes in Each Year
 
 ```{r, echo=FALSE}
 storms_season_name = distinct(group_by(select(dt_long, Season, ID), Season))
@@ -84,7 +84,7 @@ ggplot(data = storms_season_name) +
   scale_x_continuous("Year")
 ```
 
-# EDA - CAverage Speed (knot) of Hurricanes in Each Year
+# EDA - Average Speed (knot) of Hurricanes in Each Year
 
 ```{r, echo=FALSE}
 dt_long %>% 
