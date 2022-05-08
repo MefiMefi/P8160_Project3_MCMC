@@ -8,6 +8,7 @@ output: pdf_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+library(kableExtra)
 ```
 
 ## Explore the seasonal differences
@@ -48,4 +49,40 @@ summary(long_change.fit)
 summary(wind_change.fit)
 ```
 
+```{r, results = "asis"}
+sum0 <- as.data.frame(summary(intercept.fit)$coefficients[,c(1,4)]) %>% rename(beta0.fit.Est = Estimate)
+sum1 <- as.data.frame(summary(wind_prev.fit)$coefficients[,c(1,4)]) %>% rename(beta1.fit.Est = Estimate)
+sum2 <- as.data.frame(summary(lat_change.fit)$coefficients[,c(1,4)]) %>% rename(beta2.fit.Est = Estimate)
+sum3 <- as.data.frame(summary(long_change.fit)$coefficients[,c(1,4)]) %>% rename(beta3.fit.Est = Estimate)
+sum4 <- as.data.frame(summary(wind_change.fit)$coefficients[,c(1,4)]) %>% rename(beta4.fit.Est = Estimate)
+
+kable(cbind(sum0, sum1, sum2, sum3, sum4)) %>% 
+  kable_paper()
+```
+
+```{r}
+# Try to fit the beta model only with the variable season(which indicates the year)
+# Beta0
+intercept.fit.new <- lm(intercept ~ season, data = season_diff)
+# Beta1
+wind_prev.fit.new <- lm(wind_prev ~ season, data = season_diff)
+# Beta2
+lat_change.fit.new <- lm(lat_change ~ season, data = season_diff)
+# Beta3
+long_change.fit.new <- lm(long_change ~ season, data = season_diff)
+#Beta4
+wind_change.fit.new <- lm(wind_change ~ season, data = season_diff)
+
+summary(intercept.fit.new)
+summary(wind_prev.fit.new)
+summary(lat_change.fit.new)
+summary(long_change.fit.new)
+summary(wind_change.fit.new)
+```
+
+
+## Some Visualizations
+```{r}
+
+```
 

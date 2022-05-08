@@ -10,7 +10,7 @@ knitr::opts_chunk$set(echo = TRUE)
 ```
 
 ## MCMC
-
+Markov Chain Monte Carlo is combined by two methods, Markov Chain and Monte Carlo Method. Monte Carlo is a random sampling method for approximating a desired quantities, whereas Markov Chain generates a sequence of random variables where the current state only depends on the nearest past in the chain. Therefore, MCMC draw samples from Markov Chain.
 
 ## Gibbs
-Gibbs Sampler is one of Bayesian MCMC approaches with a known conditional distribution. By sampling from each random variables given the others many times, Gibbs Sampler is able to 
+Gibbs Sampler is one of Bayesian MCMC approaches with known conditional distributions. By sampling from each random variables given the others, and changing one random variable at a time, Gibbs Sampler is able to draw parameter samples from the joint distribution. Then given proper starting value, the Markov Chain can reach its stationary distribution.
