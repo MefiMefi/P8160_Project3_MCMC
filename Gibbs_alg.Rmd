@@ -213,18 +213,17 @@ MCMC.Gibbs <- function(dt, init.B, init.muvec, init.sigma2, init.Sigma, max.iter
 
 ```{r ols_beta}
 ols.beta.res = NULL
+ols.residual.res = NULL
 for(i in 1:length(dt_train)){
     lm.mdl = lm(Wind.kt~ Wind_prev+ Lat_change+ Long_change+ Wind_change, data = dt_train[[i]])
     ols.beta.res = rbind(ols.beta.res, coef(lm.mdl))
+    ols.residual = mean((lm.mdl$residuals)^2)
+    ols.residual.res = rbind(ols.residual.res, ols.residual)
 }
 ols.B = as.matrix(ols.beta.res)
 ```
 
 
-```{r test_mcmc}
-# run 10 cycles
-#test.MCMC.res = MCMC.Gibbs(dt_train, init.B = ols.B  ,init.muvec = c(1,2,3,4,5), init.sigma2 = 1, init.Sigma = diag(0.3, 5, 5), max.iter = 10)
-```
 
 ```{r run_MCMC, cache=T, eval=FALSE}
 # train set based on ID
@@ -233,7 +232,13 @@ ols.B = as.matrix(ols.beta.res)
 #finished
 
 # train set within each hurricane
-MCMC.res.2 = MCMC.Gibbs(dt_train, init.B = ols.B, init.muvec = c(1,2,3,4,5), init.sigma2 = 5, init.Sigma = diag(c(1,2,3,4,5)))
+mu0 = colMeans(ols.B,na.rm = T)
+sigmasq0 = mean(ols.residual.res)
+
+# run 10 cycles
+test.MCMC.res = MCMC.Gibbs(dt_train, init.B = ols.B  ,init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)), max.iter = 10)
+
+MCMC.res.2 = MCMC.Gibbs(dt_train, init.B = ols.B, init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)))
 save(MCMC.res.2,file = "MCMC.res.2.RData")
 ```
 
