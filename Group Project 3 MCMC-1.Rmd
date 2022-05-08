@@ -9,7 +9,7 @@ output:
 
 
 # Hurrican Data
-hurrican703.csv collected the track data of 703 hurricanes in  the North Atlantic area since 1950. For all the storms, their location (longitude \& latitude) and maximum wind speed were recorded every 6 hours. The data includes the following variables 
+hurrican703.csv collected the track data of 703 hurricanes in  the North Atlantic area since 1950. For all the storms, their location (longitude \& latitude) and maximum wind speed were recorded every 6 hours. The data includes the following variables: 
 
 1. **ID**:  ID of the hurricans
 2. **Season**: In which \textbf{year} the hurricane occurred 
