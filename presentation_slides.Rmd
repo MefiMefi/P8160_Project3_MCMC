@@ -3,7 +3,7 @@ title: |
   | P8160 - Project 3
   | Baysian modeling of hurricane
 author: |
-  | Renjie Wei, Hao Zheng, Xinran Sun
+  | Renjie Wei, Zheng Hao, Xinran Sun
   | Wentong Liu, Shengzhi Luo
 date: "2022-05-09"
 output:

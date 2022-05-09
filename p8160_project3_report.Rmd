@@ -10,7 +10,7 @@ output: pdf_document
 ---
 
 ```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+knitr::opts_chunk$set(echo = TRUE, warning = F, message = F)
 ```
 
 ## 1. Introduction
@@ -21,10 +21,11 @@ knitr::opts_chunk$set(echo = TRUE)
   
   Also, we present work that is to describe the seasonal difference based on the previous estimated Bayesian model and try to find if there is any evidence supporting that the hurricane wind speed has been increasing over years. Finally, we use additional data which includes the damages and death caused by hurricanes in the United States to build a prediction model. We wish to find the most important factors that affect hurricanes and draw inferences and conclusions based on the model.
 
+\newpage
 
 ## 2 Data Cleaning and Explorative Data Analysis
 
-## 2.1 Dataset
+### 2.1 Dataset
 hurrican703.csv collected the track data of 702 hurricanes in  the North Atlantic area from 1950 to 2013. For all the storms, their location (longitude \& latitude) and maximum wind speed were recorded every 6 hours. The data includes the following variables 
 
 1. **ID**:  ID of the hurricans
@@ -94,7 +95,7 @@ The $hurricanoutcome2.csv$ recorded the damages and death caused by 46 hurricane
     
 14. **Percent.USA**: % affected population that reside in the United States  
 
-## 2.2 EDA
+### 2.2 EDA
 
 ```{r, include = FALSE}
 library(ggplot2)
@@ -189,17 +190,18 @@ dt_long %>%
 Figure 6. Average Speed (knot) of Hurricanes in Each Nature
 \end{center}
 
+\newpage
 
 ## 3 Bayesian Model for Hurricanes Trajectories
 
-## 3.1 Markov Chain Monte Carlo (MCMC)
+### 3.1 Markov Chain Monte Carlo (MCMC)
 
 Markov Chain Monte Carlo is combined by two methods, Markov Chain and Monte Carlo Method. Monte Carlo is a random sampling method for approximating a desired quantity, whereas Markov Chain generates a sequence of random variables where the current state only depends on the nearest past in the chain. MCMC algorithm draws samples from Markov Chain successively leading us close to the desired posterior. Two commonly used MCMC algorithm are the Metropolis-Hastings Algorithm and the Gibbs Sampler. Here, we implement the Gibbs Sampler here since we can save much computation cost compared to Metropolis-Hastings Algorithm.
 
-## 3.2 Gibbs Sampler
+### 3.2 Gibbs Sampler
 Gibbs Sampler is one of Bayesian MCMC approaches with known conditional distributions. By sampling from each random variables given all the others, and changing one random variable at a time, Gibbs Sampler is able to draw parameter samples from the joint distribution. Then given proper starting value, the Markov Chain can reach its stationary distribution.
 
-## 3.3 Bayesian Hierarchical Modelling
+### 3.3 Bayesian Hierarchical Modelling
 
 Bayesian hierarchical modelling is a statistical model written in multiple levels (hierarchical form) that estimates the parameters of the posterior distribution using the Bayesian method. 
   
@@ -234,8 +236,6 @@ $$P(\sigma^2) \propto \frac{1}{\sigma^2};\quad P(\boldsymbol{\mu})\propto 1;\qua
 |\Sigma|^{-(d+1)} \exp(-\frac{1}{2}\Sigma^{-1})$$
 
 $d$ is dimension of $\beta$.
-
-\newpage
 
 ### 3.5 Posterior Distributions
 
@@ -450,24 +450,38 @@ For initial value of $\boldsymbol{\Sigma}$, we just set it to a simple diagonal 
 
 #### 3.8.1 Model Convergence
 
-The figures below show the estimates of each parameters over 10000 iterations. From the trace plots below, we can see that each parameters converge quickly. We take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. Figure display the histogram of parameters based on the last 5000 MCMC samples. From the histograms, we found that for $\boldsymbol{\beta}_i$ and $\boldsymbol{\mu}$, the distributions are relatively normal. However, we also found some skewness in the distributions of $\boldsymbol{\Sigma}$, e.g. $\boldsymbol{\Sigma}_{11}$, $\boldsymbol{\Sigma}_{12}$, $\boldsymbol{\Sigma}_{33}$ and $\boldsymbol{\Sigma}_{44}$.
+The Figures 7 and 8 below show the estimates of each parameters over 10000 iterations. From the trace plots below, we can see that each parameters converge quickly. We take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. Figures 9 and 10 display the histogram of parameters based on the last 5000 MCMC samples. From the histograms, we found that for $\boldsymbol{\beta}_i$ and $\boldsymbol{\mu}$, the distributions are relatively normal. However, we also found some skewness in the distributions of $\boldsymbol{\Sigma}$, e.g. $\boldsymbol{\Sigma}_{11}$, $\boldsymbol{\Sigma}_{12}$, $\boldsymbol{\Sigma}_{33}$ and $\boldsymbol{\Sigma}_{44}$.
 
-```{r trace_mcmc, echo=FALSE, fig.cap="Trace plots of model parameters, based on 10000 MCMC sample", out.width = '80%', fig.align='center'}
+```{r trace_mcmc, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_trace.jpg")
 ```
 
-```{r trace_mcmc_s, echo=FALSE, fig.cap="Trace plots of variance parameters, based on 10000 MCMC sample", out.width = '80%', fig.align='center'}
+\begin{center}
+Figure 7. Trace plots of model parameters, based on 10000 MCMC sample
+\end{center}
+
+```{r trace_mcmc_s, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_trace_sigma.jpg")
 ```
+\begin{center}
+Figure 8. Trace plots of variance parameters, based on 10000 MCMC sample
+\end{center}
 
 
-```{r hist_mcmc, echo=FALSE, fig.cap="Histograms of model parameters, based on last 5000 MCMC sample", out.width = '80%', fig.align='center'}
+```{r hist_mcmc, echo=FALSE,out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_hist.jpg")
 ```
+\begin{center}
+Figure 9. Histograms of model parameters, based on last 5000 MCMC sample
+\end{center}
 
-```{r hist_mcmc_s, echo=FALSE, fig.cap="Histograms of variance parameters, based on last 5000 MCMC sample", out.width = '80%', fig.align='center'}
+```{r hist_mcmc_s, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_hist_sigma.jpg")
 ```
+\begin{center}
+Figure 10. Histograms of variance parameters, based on last 5000 MCMC sample
+\end{center}
+
 
 \newpage
 
@@ -488,6 +502,9 @@ param_summary %>% mutate(
 ) %>% select(c("variable_name", "mean_beta", "var_beta", "beta_CI","mu", "var_mu","mu_CI")) %>% 
     knitr::kable(digits = 4, col.names = c("Variables", "$\\bar\\beta_i$","Var($\\bar\\beta_i$)","95% CI of $\\bar\\beta_i$","$\\bar\\mu$","Var($\\bar\\mu$)","95% CI of $\\bar\\mu$"), escape = F) 
 ```
+\begin{center}
+Table 1. Posterior Estimates of Model parameters $\mu$ and $\beta_i$
+\end{center}
 
 \newpage
 
@@ -498,10 +515,9 @@ sigma_summary %>% mutate(
     select(c("parameter", "estimates", "variance","CI")) %>% 
     knitr::kable(digits = 4, col.names = c("Parameters", "Estimates","Variance","95% CI"), escape = F) 
 ```
-
-```{r cov2cor}
-```
-
+\begin{center}
+Table 2. Posterior Estimates of Model parameters $\Sigma$ and $\sigma^2$
+\end{center}
 
 The posterior estimates of $\boldsymbol{\mu}$ reflects the population average of our model parameters. For $\boldsymbol{\mu}_0$, which is the parameter of the intercept, it tells us the average wind speed of all hurricanes. $\boldsymbol{\mu}_1$ is the coefficient associated with the previous wind speed, the estimates of it is 0.912 which is positive, means that an increase in the previous wind speed will causes a higher speed for that in the next time. $\boldsymbol{\mu}_2$ and $\boldsymbol{\mu}_3$ are the coefficients associated with the change in latitude and longitude of the hurricane, it seems that an increase in the change of latitude is associated with the increments in wind speed, on the other hand, an increase in the change of longitude is associated with the decrements in wind speed. Finally, the estimated $\boldsymbol{\mu}_4$ is 0.485 > 0, indicating that an increase in the change of wind speed will cause an increase in future wind speed.
 
@@ -530,58 +546,59 @@ From the correlation matrix, we can found that the correlation between $\boldsym
 
 We evaluate the performance of predictive ability by calculating the RMSE and the $R^2$ values for each hurricane. The residuals of Bayesian estimates that converged after iterations from MCMC will be used to predict the wind speed of test dataset.
 The overall $R^2$ is 0.822 and overall RMSE is 4.51. The valid $R^2$ is filtered with values between 0 and 1 and we get 77.5% hurriacanes (540) indicating that 22.5% of the estimated Bayesian models do not track hurricanes well and have negative $R^2$. One of the reason may be the limited number of observations of the hurricanes.
-Figure 7 shows the 10 hurriances with the least 10 RMSE. $R^2$ are also large enough to indicates that the estimated model track most hurricanes well and the smallest RMSE is GUSTAV.1996 with $R^2$ being 0.952. 
+Table 3 shows the 10 hurriances with the least 10 RMSE. $R^2$ are also large enough to indicates that the estimated model track most hurricanes well and the smallest RMSE is GUSTAV.1996 with $R^2$ being 0.952. 
 
 ```{r predict, echo=FALSE}
 load("./tables/dt_rmse.RData")
 dt_rmse %>% head(10) %>% knitr::kable(digits = 3)
 ```
 \begin{center}
-Figure 7. R-square and RMSE for prediction result on test data
+Table 3. R-square and RMSE for prediction result on test data
 \end{center}
 
-Figure 8 shows the actual wind speed and the estimated wind speed of randomly selected four hurricanes . We can see that most parts of the two curves overlapped indicating that the predicted values are close to the actual values. In DEBBY.2006, we can see that this is a very good model prediction with small deviation. 
+Figure 11 shows the actual wind speed and the estimated wind speed of randomly selected four hurricanes . We can see that most parts of the two curves overlapped indicating that the predicted values are close to the actual values. In DEBBY.2006, we can see that this is a very good model prediction with small deviation. 
 
 
 ```{r performance, echo=FALSE, out.width = '90%', fig.align='center'}
 knitr::include_graphics("./q4_prediction_plot.png")
 ```
 \begin{center}
-Figure 8. Actual Wind Speed vs. Predicted Wind Speed
+Figure 11. Actual Wind Speed vs. Predicted Wind Speed
 \end{center}
 
+\newpage
 
 ## 4 Explore the seasonal differences and wind speed change
 
 Now based on the estimated Bayesion model from previous questions, we need to explore the seasonal difference. We can fit 5 models using 5 estimated beta values against the three predictors: $X_{i,1}$: the month of the year the ith hurricane started, $X_{i,2}$:the year of the ith hurricane and $X_{i,3}$: the nature of the ith hurricane. The beta values obtained from previous Gibbs Sampler MCMC method contains the mean value of $\beta_{0,i}$, $\beta_{1,i}$, $\beta_{2,i}$, $\beta_{3,i}$ and $\beta_{4,i}$ for each of the 697 unique hurricanes, which is of the size 697 * 5.
 
-According to the summary, the R squared value for all the five fitted linear models are quite small, which may indicate bad fit. In addition, most coefficients for the model are not significant with a p-value larger than 0.05. However, for those significant coefficients, we could infer a potential relationship between the certain predictors and the beta coefficients respectively. We should consult the previous Bayesion model:
+According to the summary, the R squared value for all the five fitted linear models are quite small, which may indicate bad fit. In addition, most coefficients for the model are not significant with a p-value larger than 0.05. However, for those significant coefficients, we could infer a potential relationship between the certain predictors and the beta coefficients respectively. We should consult the previous Bayesian model:
 
 $$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
 \beta_{3,i}\Delta_{i,2}(t) +\beta_{4,i}\Delta_{i,3}(t)  + \epsilon_{i}(t)$$
 
 to interpret the change of the influence on $Y_{i,t+6}$ as the value of the predictor changes.
 
-For the fitted coefficients of $\beta_{0}$ to $\beta_{4}$, the intercept cannot show information about seasonal difference since they indicate when holding all the predictors zero, the value for the corresponding $\beta$. We can only observe that the year is quite significant in the model for $\beta_{0}$, $\beta_{1}$ with both negative estimates close to zero. Therefore, as the year increase, the coefficient of the intercept and $Y_{i,t}$ may decrease a little, which means for the Bayesian model, the wind speed when holding all the variables zero and the effect the previous wind speed has will decrease over years. Apart from seasonal difference, some other predictors are quite significant, such as natureET for $\beta_{2}$, natureTS for $\beta_{3}$.
+For the fitted coefficients of $\beta_{0}$ to $\beta_{4}$, the intercept cannot show information about seasonal difference since they indicate when holding all the predictors zero, the value for the corresponding $\beta$. We can only observe that the year is quite significant in the model for $\beta_{0}$, $\beta_{1}$ with both negative estimates close to zero. Therefore, as the year increase, the coefficient of the intercept and $Y_{i,t}$ may decrease a little, which means for the Bayesian model, the wind speed when holding all the variables zero and the effect the previous wind speed has will decrease over years. Apart from seasonal difference, some other predictors are quite significant, such as `natureET` for $\beta_{2}$, `natureTS` for $\beta_{3}$.
 
 ```{r p5_sum, echo=FALSE, warning=FALSE}
 library(kableExtra)
 load("./tables/total_sum.RData")
 total_sum %>% knitr::kable(digits = 3) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 5) 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 7) 
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against three predictors
+Table 4. Coefficients of the fitted $\beta$ model against three predictors
 \end{center}
 
 We also try to represent the months as four seasons and fit a model for $\beta$ against them. Each model has three dummy variables corresponding to the three seasons except Spring. The latter three rows of estimate shows how the value of $\beta$ differentiate between Spring and the other three seasons respectively. If with a rather small p-value, we can conclude the existence of seasonal difference. Therefore, by constructing model in this way, we find that $\beta_1$ and $\beta_4$ will increase a little as season changes from Spring to Summer, then to Autumn, which means a season difference of the effect $Y_{i,t}$ and $\Delta_{i,3}(t)$ has on the wind speed. For $\beta_2$, $\beta_3$, Summer and Autumn may lead to a slightly smaller effect of $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ have on the wind speed compared to Spring.
 
 ```{r p5_sum_new, echo=FALSE}
 load("./tables/season_sum.RData")
-season_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 6)
+season_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 8)
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against season
+Table 5. Coefficients of the fitted $\beta$ model against season
 \end{center}
 
 Now fit linear models for $\beta$ against the season variables (corresponding to the year) to seek for potential evidence of the statement :"the wind speed has been increasing over years". In order to analyze this question, need to inspect on model which corresponds to the wind speed and the year. For $\beta_{2}$ model, the estimate of year is significant, although it's really close to zero. Therefore, we can infer that as the year increases, the impact past wind speed has on the current wind speed may decrease a little, which cannot provide support for the statement. However, it's quite match with the results shown in the figures in the initial EDA session, which indicates the mean wind speed tends to decrease over years.
@@ -591,7 +608,7 @@ load("./tables/year_sum.RData")
 year_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 8)
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against year
+Table 6. Coefficients of the fitted $\beta$ model against year
 \end{center}
 
 In conclusion, for different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. And there is no evidence to support the statement in task 5.
@@ -607,11 +624,11 @@ library(corrplot)
 library(plotmo)
 ```
 
+\newpage
+
 ## 5 Predict the hurricane-induced damage and deaths
-Firstly, we plot deaths and financial loss separately. Figure 99. shows the distributions of deaths and damage. We could easily find a few points which are far away from most of the points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enable the model to predict the worst outcome. Therefore, we keep these points in model building.
-\begin{center}
-Figure 99. Distributions of Damage and Deaths
-\end{center}
+
+Firstly, we plot deaths and financial loss separately. Figure 12. shows the distributions of deaths and damage. We could easily find a few points which are far away from most of the points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enable the model to predict the worst outcome. Therefore, we keep these points in model building.
 
 ```{r, echo=FALSE}
 load("beta.res.postmean.Rdata")
@@ -632,12 +649,12 @@ par(mfrow=c(1,2))
 plot(dat_q6$Damage, xlab = "Hurricanes", ylab = "Damage")
 plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths")
 ```
-
-In order to build a model that combines information in original data and the estimated coefficients from the Bayesian model, we extract the coefficients from the previous results. By taking the average of $\beta_{i}$ at different time points, we obtain $\beta_{0}  \sim  \beta_{4}$ of each hurricane. Part of the results is shown in Table 99.
-
 \begin{center}
-Table 99. Coefficients of Each Hurricane
+Figure 12. Distributions of Damage and Deaths
 \end{center}
+
+In order to build a model that combines information in original data and the estimated coefficients from the Bayesian model, we extract the coefficients from the previous results. By taking the average of $\beta_{i}$ at different time points, we obtain $\beta_{0}  \sim  \beta_{4}$ of each hurricane. Part of the results is shown in Table 7.
+
 ```{r, echo=FALSE, message=FALSE}
 load("beta.res.postmean.Rdata")
 dat = read.csv("hurricanoutcome2.csv") %>% 
@@ -679,13 +696,14 @@ data_res = data_res %>%
          Hours = as.numeric(Hours),
          Total.Pop = as.numeric(Total.Pop))
 
-Coef_table = data_res %>% 
+data_res %>% 
   select(id, intercept, beta1, beta2, beta3, beta4) %>% 
   head(10) %>% 
-  knitr::kable()
-
-Coef_table
+  knitr::kable()%>% kable_styling(position = "center")
 ```
+\begin{center}
+Table 8. Coefficients of Each Hurricane
+\end{center}
 
 Fortunately, 43 hurricanes recorded in $hurricanoutcome2.csv$ are also in $hurrican703.csv$. Thus, we merge two data frame by hurricane id to predict the deaths and damage caused by hurricanes.
 
@@ -696,9 +714,7 @@ $log(E(Deaths)) = \beta_{i}X_{i} + offset$
 \end{center}
 
 Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 99.
-\begin{center}
-Table 99. Coefficients of Deaths Prediction
-\end{center}
+
 ```{r, echo=FALSE}
 data_deaths = data_res %>% 
   select(-c(id, Damage))
@@ -706,8 +722,11 @@ offset_pop = data_deaths %>% pull(Total.Pop)
 offset_dur = data_deaths %>% pull(Hours)
 deaths.fit = glm(Deaths ~ . + offset(log(offset_pop)) + offset(log(offset_dur)), data = data_deaths %>% select(-c(Total.Pop, Hours)), family = "poisson")
 deaths.tidy = summary(deaths.fit) %>% na.omit()
-knitr::kable(deaths.tidy$coefficients)
+knitr::kable(deaths.tidy$coefficients)%>% kable_styling(position = "center")
 ```
+\begin{center}
+Table 9. Coefficients of Deaths Prediction
+\end{center}
 
 From the results, $\beta_{0}  \sim  \beta_{4}$ indicate the relatively strong association. Especially, $\beta_{1}$, which represents the earlier wind speed has the biggest coefficient. We could conclude that high wind speed of hurricane more easily leads to serious casualties. Also, months seem to be an important factor in prediction. Comparing to June and September, July, November and October have lower proportion of death given all other variables constant. 
 
@@ -744,9 +763,12 @@ damage.tidy = tidy(damage.fit)
 
 
 
-table6 = knitr::kable(damage.tidy)
-table6
+knitr::kable(damage.tidy)%>% kable_styling(position = "center")
+
 ```
+\begin{center}
+Table 10. Coefficients of Damage Prediction
+\end{center}
 
 The results of coefficients in predicting damage also show the importance of $\beta_{1}$. From the model, we can see that serious casualties are also accompanied by serious financial losses which are strongly influenced by earlier wind speed and are slightly affected by months, latitude change, longitude change and wind speed change. $\beta_{0}  \sim  \beta_{4}$ are generally powerful in damage and deaths prediction.
 
@@ -777,6 +799,148 @@ Xinran contributed to the data cleaning and EDA of the hurricanes data and the i
 
 
 ## Appendix
+
+The code of data cleaning and EDA is in the `.Rmd` file of the report. For more information see https://github.com/MefiMefi/P8160_Project3_MCMC/
+
+### Posterior Distribution Sampling
+
+```{r posterior_samp, eval=F}
+# posterior of B
+# each beta_i 1*5
+# B n*5
+
+post.B <- function(dt, muvec, sigma2, Sigma){
+   n = length(dt)
+   B = NULL
+   RSS = NULL
+   m = NULL
+   for (i in 1:n){
+       # stuffs to define the distribution
+       X = as.matrix(dt[[i]][,-1]) 
+       y = as.vector(dt[[i]][,1])
+       V = sigma2^(-1) * t(X) %*% X + solve(Sigma)
+       M = sigma2^(-1) * t(y) %*% X + muvec %*% solve(Sigma)
+       mean_bi = solve(V) %*% t(M) # we need a 5*1
+       vcov_bi = solve(V)
+       bi = mvrnorm(1, mu = mean_bi, Sigma = vcov_bi)
+       B = rbind(B, bi)
+       # calculate RSS,m_i for sigma2
+       RSS = rbind(RSS, sum((y - X %*% bi)^2))
+       m = rbind(m, nrow(X))
+   }
+   return(list(B = B, RSS = RSS, m = m))
+}
+
+# test passed
+#testB = post.B(dt = dt_mtx, muvec = rep(0,5), sigma2 = 2, Sigma = diag(2,5,5))
+
+
+# sampling sigma2 from a inverse gamma, need sum(m_i) and SSR
+post.sigma2 <- function(m, RSS){
+    alpha_ = sum(m)/2
+    beta_ = sum(RSS)/2
+    sigma2 = rinvgamma(1, alpha = alpha_, beta = beta_)
+    return(sigma2)
+}
+
+# test passed
+#testsigma2 = post.sigma2(testB$m, testB$RSS)
+
+# sampling Sigma from inverse wishart distribution
+post.Sigma <- function(B, muvec){
+    n = nrow(B)
+    S.matrix = diag(1, 5, 5)
+    for (i in 1:n){
+        beta_i = B[i,]
+        S.matrix = S.matrix + (beta_i-muvec) %*% t(beta_i-muvec)
+    }
+    v = n + 5 + 1
+    Sigma = rinvwishart(1, nu = v, Omega = S.matrix, checkSymmetry = F)
+    return(Sigma[,,1])
+}
+
+# test passed
+#testSigma = post.Sigma(testB$B, rep(1,5))
+
+# sampling muvec from multivariate normal distribution
+post.mu <- function(B, Sigma){
+    n = nrow(B)
+    mean_mu = colMeans(B)
+    vcov_mu = 1/n * Sigma
+    muvec = mvrnorm(1, mean_mu, vcov_mu)
+    return(muvec)
+}
+
+# test passed
+#testmuvec = post.mu(testB$B, testSigma)
+```
+
+### MCMC Algorithm
+
+```{r MCMC_Gibbs, eval=F}
+MCMC.Gibbs <- function(dt, init.B, init.muvec, init.sigma2, init.Sigma, max.iter = 1e4){
+    B.res = list()
+    sigma2.res = list()
+    Sigma.res = list()
+    muvec.res = list()
+    
+    # initialize B
+    init.Bstuff = post.B(dt, init.muvec, init.sigma2, init.Sigma)
+    
+    cur.stuff = NULL
+    cur = list(B = init.B, sigma2 = init.sigma2, muvec = init.muvec, Sigma = init.Sigma ,RSS = init.Bstuff$RSS)
+    
+    B.res[[1]] = init.B
+    sigma2.res[[1]] = cur$sigma2
+    Sigma.res[[1]] = cur$Sigma
+    muvec.res[[1]] = cur$muvec
+    
+    prev.stuff = cur.stuff
+    prev = cur
+    
+    # start iteration
+    for (i in 2:max.iter) {
+        cur.stuff = post.B(dt, prev$muvec, prev$sigma2, prev$Sigma)
+        sigma2 = post.sigma2(cur.stuff$m, cur.stuff$RSS)
+        Sigma = post.Sigma(cur.stuff$B, prev$muvec)
+        muvec = post.mu(cur.stuff$B, Sigma)
+        
+        # update current parameters
+        cur = list(B = cur.stuff$B, sigma2 = sigma2, muvec = muvec, Sigma = Sigma, RSS = cur.stuff$RSS)
+        prev.stuff = cur.stuff
+        prev = cur
+        
+        # append to final result
+        B.res[[i]] = cur$B
+        sigma2.res[[i]] = cur$sigma2
+        Sigma.res[[i]] = cur$Sigma
+        muvec.res[[i]] = cur$muvec
+        
+    }
+    return(list(
+        B = B.res,
+        sigma2 = sigma2.res,
+        Sigma = Sigma.res,
+        muvec = muvec.res
+    ))
+}
+```
+### MCMC inplementation
+
+```{r run_MCMC, cache=T, eval=FALSE}
+mu0 = colMeans(ols.B,na.rm = T)
+sigmasq0 = mean(ols.residual.res)
+
+# Good inital value
+MCMC.res.2 = MCMC.Gibbs(dt_train, init.B = ols.B, init.muvec = mu0, init.sigma2 = sigmasq0, init.Sigma = diag(c(1,2,3,4,5)))
+save(MCMC.res.2,file = "MCMC.res.2.RData")
+
+#Bad starting value
+bad.B = matrix(seq(1:(5*697)), 697)
+bad.mu = colMeans(bad.B)
+MCMC.res.bad =  MCMC.Gibbs(dt_train, init.B = bad.B, init.muvec = bad.mu, init.sigma2 = sigmasq0*1000, init.Sigma = diag(c(1000,50,1000,500,100)), max.iter = 10000)
+save(MCMC.res.bad,file = "MCMC.res.bad.RData")
+```
 
 ### Model Performance
 ```{r,eval=FALSE,echo=TRUE}
@@ -809,7 +973,7 @@ mean(dt_rmse$r_square)
 mean(dt_rmse$rmse)
 ```
 
-## Seasonal Difference
+### Seasonal Difference
 ```{r,eval=FALSE}
 load("./dt_long.RData")
 load("./ID_in.RData")
@@ -926,4 +1090,13 @@ sum4.new <- summary(wind_change.fit.new)$coefficients[,c(1,4)]
 kable(cbind(sum0.new, sum1.new, sum2.new, sum3.new, sum4.new)) %>% 
   kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
   add_header_above(c(" " = 1, "Beta 0" = 2, "Beta 1" = 2, "Beta 2" = 2, "Beta 3" = 2, "Beta 4" = 2))
+```
+
+### Bad inital value
+
+```{r bad_init_trace, echo=FALSE, out.width = '90%', fig.align='center'}
+knitr::include_graphics("./plots/mcmc_trace_bad.jpg")
+```
+```{r bad_init_hist, echo=FALSE, out.width = '90%', fig.align='center'}
+knitr::include_graphics("./plots/mcmc_hist_bad.jpg")
 ```
