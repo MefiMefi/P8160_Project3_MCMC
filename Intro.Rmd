@@ -1,0 +1,63 @@
+---
+title: "A Hierarchical Bayesian model for hurricane trajectories"
+date: "5/3/2022"
+output: pdf_document
+---
+
+# Introduction
+
+  Bayesian hierarchical modelling is a statistical model written in multiple levels (hierarchical form) that estimates the parameters of the posterior distribution using the Bayesian method. 
+  
+  Hierarchical Bayesian Models, which contain both within-group analysis and between-group analysis, are always used to learn about a population from many individual measurements. Therefore, there is natural heterogeneity during the research periods and it could be regarded as subject-specific mean response trajectories for each individual group. To build the model, we split the inference problem into steps, where the full model is made up of a series of sub-models. The Bayesian Hierarchical Model links the sub-models together, correctly propagating uncertainties in each sub-model from one level to the next. MCMC methods work particularly well with hierarchical models, and is the engine that has fueled the development and application of Bayes' theorem. 
+  
+  From the Bayes' theorem: $$posterior\ distribution \propto likelihood \times prior\ distribution$$
+$$ {\pi(\theta| X)} \propto {\pi(X|\theta)} \times {\pi(\theta)}$$
+  The Hierarchical Bayes
+  $$ {\pi(\theta, \alpha| X)} \propto {\pi(X|\theta)} \times {\pi(\theta|\alpha)} \times {\pi(\alpha)}$$
+  Bayesian Inference is a statistical inference method about parameter. Proper prior distribution of parameter $\theta$ is set. After data collection, the belief of parameter $\theta$ would be updated by exploring the posterior distribution of $\theta$ based on observed data and its pre-assumed likelihood function $L(X; \theta)$. The linear regression model in hierarchical form incorporating with Bayesian inference is implemented with MCMC Integration algorithm for updating the parameter estimation in the final MCMC stationary phase.
+  
+# Objectives
+
+  Hurricanes are a serious social and economic concern to the United States. Strong winds, heavy rainfall, and high storm surge kill people and destroy property. There is an increasing desire to predict the performance of hurricane, such as its location, speed and so on. In this project, we are interested in modeling the hurricane trajectories to forecast the wind speed achieved by Hierarchical Bayesian Model. The hurricane data contains individual-level-specific effects of each hurricane. Model integration is achieved through a Markov Chain Monte Carlo algorithm.
+  
+  Also, we present work that is to describe the seasonal difference based on the previous estimated Bayesian model and try to find if there is any evidence supporting that the hurricane wind speed has been increasing over years. Finally, we use additional data which includes the damages and death caused by hurricanes in the United States to build a prediction model. We wish to find the most important factors that affect hurricanes and draw inferences and conclusions based on the model.
+
+# Data
+
+### Hurricane Data
+
+hurrican703.csv collected the track data of 703 hurricanes in the North Atlantic area since 1950. For all the storms, their location (longitude & latitude) and maximum wind speed were recorded every 6 hours. The data includes the following variables 
+
+1. **ID**: ID of the hurricanes
+2. **Season**: In which \textbf{year} the hurricane occurred 
+3. **Month**: In which \textbf{month} the hurricane occurred 
+4. **Nature**: Nature of the hurricane 
+  + ET: Extra Tropical
+  + DS: Disturbance
+  + NR: Not Rated
+  + SS: Sub Tropical
+  + TS: Tropical Storm
+5. **time**: dates and time of the record  
+6. **Latitude** and **Longitude**: The location of a hurricane check point 
+7. **Wind.kt** Maximum wind speed (in Knot) at each check point
+
+hurricanoutcome2.csv recorded the damages and death caused by 46 hurricanes in the U.S, and some features extracted from the hurricane records. The variables include
+
+1. **ID**: ID of the hurricanes
+2. **Month**: In which \textbf{month} the hurricane occurred 
+3. **Nature**: Nature of the hurricane 
+  + ET: Extra Tropical
+  + DS: Disturbance
+  + NR: Not Rated
+  + SS: Sub Tropical
+  + TS: Tropical Storm
+4. **Damage**: Financial loss (in Billion U.S. dollars) caused by hurricanes
+5. **Deaths**: Number of death caused by hurricanes
+6. **Maxspeed**: Maximum recorded wind speed of the hurricane
+7. **Meanspeed**: average  wind speed of the hurricane
+8. **Maxpressure**: Maximum recorded central pressure of the hurricane
+9. **Meanpressure**: average central pressure of the hurricane
+10. **Hours**: Duration of the hurricane in hours 
+11. **Total.Pop**: Total affected population   
+12. **Percent.Poor**: \% affected population that reside in low GDP countries (i.e. GDP per Capita <= 10,000)  
+13. **Percent.USA**: \% affected population that reside in the United States
