@@ -450,21 +450,30 @@ For initial value of $\boldsymbol{\Sigma}$, we just set it to a simple diagonal 
 
 #### 3.8.1 Model Convergence
 
-The Figures 7 and 8 below show the estimates of each parameters over 10000 iterations. From the trace plots below, we can see that each parameters converge quickly. We take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. Figures 9 and 10 display the histogram of parameters based on the last 5000 MCMC samples. From the histograms, we found that for $\boldsymbol{\beta}_i$ and $\boldsymbol{\mu}$, the distributions are relatively normal. However, we also found some skewness in the distributions of $\boldsymbol{\Sigma}$, e.g. $\boldsymbol{\Sigma}_{11}$, $\boldsymbol{\Sigma}_{12}$, $\boldsymbol{\Sigma}_{33}$ and $\boldsymbol{\Sigma}_{44}$.
+The Figures 7 and 8 below show the estimates of each parameters over 10000 iterations. From the trace plots below, we can see that each parameters converge quickly. We take the first 5000 iterations as our burn-in period and use the last 5000 iterations (iterations 5001 to 10000) to do the posterior parameter estimates and inferences. Figures 9 and 10 display the histogram of parameters based on the last 5000 MCMC samples. From the histograms, we found that for $\boldsymbol{\beta}_i$ and $\boldsymbol{\mu}$, the distributions are relatively normal. However, we also found some skewness in the distributions of $\boldsymbol{\Sigma}$, e.g. $\boldsymbol{\Sigma}_{11}$, $\boldsymbol{\Sigma}_{12}$, $\boldsymbol{\Sigma}_{33}$ and $\boldsymbol{\Sigma}_{44}$
+
+From the corresponding autocorrelation function (ACF) plots, we can get a sense of the degree of serial correlation of the MCMC draws. From these plots we see how the sample autocorrelation between the parameters of the chain decreases as a function of their lag. The ACF plots of $\mu$ and $\beta_i$ shows that autocorrelation is large at short lags, but then goes to around zero pretty quickly. For the ACF of $\Sigma$ and $\sigma^2$, it seems that for some parameters, the autocorrelation doesn't shrinks to zero even after 500 lag (e.g. $\Sigma_{13}$).
 
 ```{r trace_mcmc, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_trace.jpg")
 ```
+```{r acf_mcmc, echo=FALSE, out.width = '80%', fig.align='center'}
+knitr::include_graphics("./plots/acf_mu_beta.jpg")
+```
 
 \begin{center}
-Figure 7. Trace plots of model parameters, based on 10000 MCMC sample
+Figure 7. Trace plots and ACF plots of model parameters, based on 10000 MCMC sample
 \end{center}
 
 ```{r trace_mcmc_s, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_trace_sigma.jpg")
 ```
+```{r acf_mcmc_s, echo=FALSE, out.width = '80%', fig.align='center'}
+knitr::include_graphics("./plots/acf_sigma.jpg")
+```
+
 \begin{center}
-Figure 8. Trace plots of variance parameters, based on 10000 MCMC sample
+Figure 8. Trace plots and ACF plots of variance parameters, based on 10000 MCMC sample
 \end{center}
 
 
@@ -611,7 +620,7 @@ year_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 
 Table 6. Coefficients of the fitted $\beta$ model against year
 \end{center}
 
-In conclusion, for different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. And there is no evidence to support the statement in task 5.
+In conclusion, for different months, there is no significant differences observed. Over years, the effect the wind speed 6 hours ago has on the current wind speed may decrease a little. And there is no evidence to support the statement in task 5.
 
 
 
@@ -702,7 +711,7 @@ data_res %>%
   knitr::kable()%>% kable_styling(position = "center")
 ```
 \begin{center}
-Table 8. Coefficients of Each Hurricane
+Table 7. Coefficients of Each Hurricane
 \end{center}
 
 Fortunately, 43 hurricanes recorded in $hurricanoutcome2.csv$ are also in $hurrican703.csv$. Thus, we merge two data frame by hurricane id to predict the deaths and damage caused by hurricanes.
@@ -713,7 +722,7 @@ The death variable is a count variable, so we decided to use Poisson regression 
 $log(E(Deaths)) = \beta_{i}X_{i} + offset$
 \end{center}
 
-Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 99.
+Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 8.
 
 ```{r, echo=FALSE}
 data_deaths = data_res %>% 
@@ -725,7 +734,7 @@ deaths.tidy = summary(deaths.fit) %>% na.omit()
 knitr::kable(deaths.tidy$coefficients)%>% kable_styling(position = "center")
 ```
 \begin{center}
-Table 9. Coefficients of Deaths Prediction
+Table 8. Coefficients of Deaths Prediction
 \end{center}
 
 From the results, $\beta_{0}  \sim  \beta_{4}$ indicate the relatively strong association. Especially, $\beta_{1}$, which represents the earlier wind speed has the biggest coefficient. We could conclude that high wind speed of hurricane more easily leads to serious casualties. Also, months seem to be an important factor in prediction. Comparing to June and September, July, November and October have lower proportion of death given all other variables constant. 
@@ -736,7 +745,7 @@ In order to obtain the integer data, we transform the units of `Damage` from bil
 $log(E(Damage*1000)) = \beta_{i}X_{i} + offset$
 \end{center}
 
-Where $X_{i}$ presents all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients results is in Table 99.
+Where $X_{i}$ presents all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients results is in Table 9.
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
 df_total = data.frame()
@@ -767,7 +776,7 @@ knitr::kable(damage.tidy)%>% kable_styling(position = "center")
 
 ```
 \begin{center}
-Table 10. Coefficients of Damage Prediction
+Table 9. Coefficients of Damage Prediction
 \end{center}
 
 The results of coefficients in predicting damage also show the importance of $\beta_{1}$. From the model, we can see that serious casualties are also accompanied by serious financial losses which are strongly influenced by earlier wind speed and are slightly affected by months, latitude change, longitude change and wind speed change. $\beta_{0}  \sim  \beta_{4}$ are generally powerful in damage and deaths prediction.
@@ -781,7 +790,7 @@ Our MCMC algorithm successfully estimates the high-dimensional parameters. First
 
 Based on posterior estimates of $\mu$, an increase in current wind speed and the change in wind speed is associated with increase in the wind speed in the upcoming future. And the posterior estimate of $\boldsymbol{\Sigma}$ shows that the correlations between $\beta_i$'s are relatively small.
 
-In exploring how the year, month and the nature of hurricanes affect the wind speed, we found that for different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. The nature of the hurricanes does play a important rol in wind speed.
+In exploring how the year, month and the nature of hurricanes affect the wind speed, we found that for different months, there is no significant differences observed. Over years, the effect the wind speed 6 hours ago has on the current wind speed may decrease a little. The nature of the hurricanes does play a important role in wind speed.
 
 Finally, when focusing on predicting the death and loss caused by hurricanes, the $\beta_i$ coefficients estimated from the Bayesian model have great importance. Especially $\beta_1$, which is the estimated coefficient associated with the previous wind speed, is significant and relatively strong in both damage and loss model, which may indicates that the wind speed of a hurricane strongly affect the damage and financial loss caused by it.
 
@@ -791,6 +800,8 @@ Finally, when focusing on predicting the death and loss caused by hurricanes, th
 Due to the computational cost of MCMC algorithm, we do not have the chance to test our algorithm stability by setting different starting values. We did some exploration about the starting value (see Appendix), even if the starting value is ridiculous, our MCMC algorithm successfully converged and the posterior estimates are pretty close to the ones with good initial value. More effort should be done to test the model reliability in the future.
 
 In model training and testing, we dropped several hurricanes' data with few observations (<3). However, the lack of observations may be associated with the nature of the hurricanes and hence affect the damage and financial loss caused. Carefully studies should be done on these short-term hurricanes data.
+
+From the ACF plots of components in the variance covariance matrix, we can see that for some parameters, not only autocorrelation is large at short lags, but it also dies out very slowly. We should future examine the serial correlation between successive draws.
 
 ### 6.3 Group Contribution
 
@@ -1100,3 +1111,9 @@ knitr::include_graphics("./plots/mcmc_trace_bad.jpg")
 ```{r bad_init_hist, echo=FALSE, out.width = '90%', fig.align='center'}
 knitr::include_graphics("./plots/mcmc_hist_bad.jpg")
 ```
+
+## Citations
+
+1. Taboga, Marco (2021). "Markov Chain Monte Carlo (MCMC) diagnostics", Lectures on probability theory and mathematical statistics. Kindle Direct Publishing. Online appendix.
+
+2. Elsner, J. B., Niu, X., & Jagger, T. H. (2004). Detecting Shifts in Hurricane Rates Using a Markov Chain Monte Carlo Approach, Journal of Climate, 17(13), 2652-2666. Retrieved May 9, 2022, from https://journals.ametsoc.org/view/journals/clim/17/13/1520-0442_2004_017_2652_dsihru_2.0.co_2.xml
