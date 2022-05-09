@@ -282,19 +282,6 @@ knitr::include_graphics("./plots/model_param.jpg")
 knitr::include_graphics("./plots/variance_param.jpg")
 ```
 
-# Bayesian Model Performance 
-
-
-```{r predict, echo=FALSE, fig.cap="R Squared and RMSE", out.width = '90%', fig.align='center'}
-knitr::include_graphics("./rmse.png")
-```
-
-# Bayesian Model Performance 
-
-```{r performance, echo=FALSE, fig.cap="Actual Wind Speed vs. Predicted Wind Speed", out.width = '90%', fig.align='center'}
-knitr::include_graphics("./q4_prediction_plot.png")
-```
-
 # Seasonal Difference Exploration
 ```{r p5_sum, echo=FALSE, fig.cap="Fitted results of beta models", out.width = '90%', fig.align='center'}
 knitr::include_graphics("./p5_sum.jpg")
