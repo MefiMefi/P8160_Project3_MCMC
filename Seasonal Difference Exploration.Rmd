@@ -57,9 +57,12 @@ sum2 <- summary(lat_change.fit)$coefficients[,c(1,4)]
 sum3 <- summary(long_change.fit)$coefficients[,c(1,4)]
 sum4 <- summary(wind_change.fit)$coefficients[,c(1,4)]
 
-kable(cbind(sum0, sum1, sum2, sum3, sum4)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
+p5_sum <- cbind(sum0, sum1, sum2, sum3, sum4)
+cbind(sum0, sum1, sum2, sum3, sum4) %>% 
+  knitr::kable(digits = 3, col.names = c("Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval")) %>% 
+  kable_styling(bootstrap_options = c("condensed")) %>% 
   add_header_above(c(" " = 1, "Beta 0" = 2, "Beta 1" = 2, "Beta 2" = 2, "Beta 3" = 2, "Beta 4" = 2))
+save(p5_sum, file = "./tables/p5_sum.RData")
 ```
 
 Now based on the estimated Bayesion model from previous questions, we need to explore the seasonal difference. We can fit 5 models using 5 estimated beta values against the three predictors: $X_{i,1}$: the month of the year the ith hurricane started, $X_{i,2}$:the year of the ith hurricane and $X_{i,3}$: the nature of the ith hurricane. The beta values obtained from previous Gibbs Sampler MCMC method contains the mean value of $\beta_{0,i}$, $\beta_{1,i}$, $\beta_{2,i}$, $\beta_{3,i}$ and $\beta_{4,i}$ for each of the 697 unique hurricanes, which is of the size 697 * 5.
@@ -106,9 +109,12 @@ sum2_2 <- summary(lat_change.fit.2)$coefficients[,c(1,4)]
 sum3_2 <- summary(long_change.fit.2)$coefficients[,c(1,4)]
 sum4_2 <- summary(wind_change.fit.2)$coefficients[,c(1,4)]
 
-kable(cbind(sum0_2, sum1_2, sum2_2, sum3_2, sum4_2)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
+p5_sum2 <- cbind(sum0_2, sum1_2, sum2_2, sum3_2, sum4_2)
+cbind(sum0_2, sum1_2, sum2_2, sum3_2, sum4_2) %>% 
+  knitr::kable(digits = 3, col.names = c("Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval")) %>% 
+  kable_styling(bootstrap_options = c("condensed")) %>% 
   add_header_above(c(" " = 1, "Beta 0" = 2, "Beta 1" = 2, "Beta 2" = 2, "Beta 3" = 2, "Beta 4" = 2))
+save(p5_sum2, file = "./tables/p5_sum2.RData")
 ```
 
 We also try to represent the months as four seasons and fit a model for $\beta$ against them. Each model has three dummy variables corresponding to the three seasons except Spring. The latter three rows of estimate shows how the value of $\beta$ differentiate between Spring and the other three seasons respectively. If with a rather small p-value, we can conclude the existence of seasonal difference. Therefore, by constructing model in this way, we find that $\beta_1$ and $\beta_4$ will increase a little as season changes from Spring to Summer, then to Autumn, which means a season difference of the effect $Y_{i,t}$ and $\Delta_{i,3}(t)$ has on the wind speed. For $\beta_2$, $\beta_3$, Summer and Autumn may lead to a slightly smaller effect of $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ have on the wind speed compared to Spring.
@@ -138,9 +144,14 @@ sum2.new <- summary(lat_change.fit.new)$coefficients[,c(1,4)]
 sum3.new <- summary(long_change.fit.new)$coefficients[,c(1,4)]
 sum4.new <- summary(wind_change.fit.new)$coefficients[,c(1,4)]
 
-kable(cbind(sum0.new, sum1.new, sum2.new, sum3.new, sum4.new)) %>% 
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed")) %>% 
+p5_sum_new <- cbind(sum0.new, sum1.new, sum2.new, sum3.new, sum4.new)
+
+cbind(sum0.new, sum1.new, sum2.new, sum3.new, sum4.new) %>% 
+  knitr::kable(digits = 3, col.names = c("Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval", "Est", "pval")) %>% 
+  kable_styling(bootstrap_options = c("condensed")) %>% 
   add_header_above(c(" " = 1, "Beta 0" = 2, "Beta 1" = 2, "Beta 2" = 2, "Beta 3" = 2, "Beta 4" = 2))
+
+save(p5_sum_new, file = "./tables/p5_sum_new.RData")
 ```
 
 Now fit linear models for $\beta$ against the season variables (corresponding to the year) to seek for potential evidence of the statement :"the wind speed has been increasing over years". In order to analyze this question, need to inspect on model which corresponds to the wind speed and the year. For $\beta_{2}$ model, the estimate of year is significant, although it's really close to zero. Therefore, we can infer that as the year increases, the impact past wind speed has on the current wind speed may decrease a little, which cannot provide support for the statement. However, it's quite match with the results shown in the figures in the initial EDA session, which indicates the mean wind speed tends to decrease over years.
