@@ -17,6 +17,10 @@ header-includes:
 - \captionsetup[figure]{labelformat=empty}
 ---
 
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = F, warning = F, message = F)
+```
+
 # Introduction
 * Hurricanes can result in death and economical damage
 * There is an increasing desire to predict the speed and damage of the hurricanes
@@ -362,13 +366,13 @@ plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths", pch = 15, col = "red")
 ```
 # Code
 
-```{r setup, include=FALSE}
-knitr::opts_chunk$set(echo = TRUE)
+```{r setup_2, include=FALSE}
 library(tidyverse)
 library(base)
 library(caret)
 library(corrplot)
 library(plotmo)
+library(kableExtra)
 ```
 
 
@@ -401,97 +405,53 @@ $log(Damage*1000 or Deaths) = \beta_{i}X_{i}$
 - convert `Damage` units from billions to millions to get integer data
 
 
-
-```{r}
-## Import Data
-dat_hur = read.csv("hurrican703.csv") %>% 
-  janitor::clean_names() %>%
-  group_by(id) %>% 
-  mutate(id = tolower(id),
-         wind_early = lag(wind_kt, 1),
-         lat_change = lag(latitude, 0) - lag(latitude, 1),
-         long_change = lag(longitude, 0) - lag(longitude, 1),
-         wind_change = lag(wind_kt, 0) - lag(wind_kt, 1)) %>% 
-  na.omit() %>% 
-  as.data.frame()
-
-dat_before = beta.res.postmean %>% 
-  rename(id = ID) %>% 
-  mutate(id = tolower(id))
-
-combine_data = merge(dat_before, dat_hur, by = "id") %>% 
-  rename(beta1 = Wind_prev, beta2 = Lat_change, beta3 = Long_change, beta4 = Wind_change) %>% 
-  select(id, season, month, nature, intercept, beta1, beta2, beta3, beta4, wind_early, lat_change, long_change, wind_change)
-
-combine.data2 = combine_data %>% 
-  select(id, intercept, beta1, beta2, beta3, beta4) %>% 
-  group_by(id, intercept, beta1, beta2, beta3, beta4) %>% 
-  summarize(nobs = n())
-
-data_res = merge(combine.data2, dat_q6, by = "id")
-data_res = data_res %>% 
-  mutate(nobs = as.numeric(nobs),
-         Maxpressure = as.numeric(Maxpressure),
-         Hours = as.numeric(Hours),
-         Total.Pop = as.numeric(Total.Pop))
-
-Coef_table = data_res %>% 
-  select(id, intercept, beta1, beta2, beta3, beta4) %>% 
-  knitr::kable()
-
-Coef_table %>% head(10)
-```
-
-```{r}
-data_damage = data_res %>% 
-  select(-c(id, Deaths)) %>% 
-  mutate(Damage = 1000*Damage)
-
-require(broom)
-damage.fit = glm(Damage ~., data = data_damage, family = "poisson"(link = "log"))
-summary(damage.fit)
-damage.tidy = tidy(damage.fit) %>% na.omit()
-
-df_total = data.frame()
-coef_res = function(table){
-  for (i in 1:22) {
-    df = table[i,]
-    if(table[i,5]<0.05){df_total = rbind(df_total, df) 
-    i = i + 1}
-    else{i = i +1}
-  }
-  print(df_total)
-}
-
-coef_res(damage.tidy)
-```
-
-```{r}
-library(glmnet)
-data_deaths = data_res %>% 
-  select(-c(id, Damage))
-
-deaths.fit = glm(Deaths ~ ., data = data_deaths, family = "poisson")
-
-deaths.tidy = tidy(deaths.fit) %>% na.omit()
-coef_res(deaths.tidy)
-```
-
-
-
-
-
 # Coefficient Table
-```{r coef_table, echo=FALSE, fig.cap="Fitted results of beta models", out.width = '90%', fig.align='center'}
-knitr::include_graphics("./coef_table.jpg")
+
+```{r coef_table, out.width="80%", echo=FALSE, warning=F, message=F}
+load("./tables/data_res.RData")
+data_res %>% 
+  dplyr::select(id, intercept, beta1, beta2, beta3, beta4) %>% head(10) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c(
+                   "ID",
+                   "$\\beta_0$",
+                   "$\\beta_1$",
+                   "$\\beta_2$",
+                   "$\\beta_3$",
+                   "$\\beta_4$"
+               ),
+               escape = F,
+               caption = "Coefficient estimates table from Bayesian model"
+               )
 ```
+
 
 # Predict Damage
-```{r damage, echo=FALSE, fig.cap="Coefficients of damage prediction model", out.width = '90%', fig.align='center'}
-knitr::include_graphics("./damage.jpg")
+
+```{r pred_damage}
+load("./tables/damage.tidy.RData")
+damage.tidy %>% knitr::kable(digits = 3, escape = F, caption = "Coefficients of damage prediction model") %>% kable_styling(font_size = 5)
 ```
 
 # Predict Deaths
-```{r deaths, echo=FALSE, fig.cap="Coefficients of deaths prediction model", out.width = '70%', fig.align='center'}
-knitr::include_graphics("./deaths.jpg")
+
+```{r pred_death}
+load("./tables/deaths.tidy.RData")
+deaths.tidy %>% knitr::kable(digits = 3, escape = F, caption = "Coefficients of death prediction model") %>% kable_styling(font_size = 5)
 ```
+
+
+
+# Conclusions
+
+- Based on posterior estimates of $\mu$, an increase in current wind speed and the change in wind speed is associated with increase in the wind speed in the upcoming future.
+
+- Our MCMC algorithm successfully estimates the high-dimensional parameters
+
+    + All the parameters converges quickly under a good initial values setting
+    
+    + The overall $R^2$ is relatively large, our model fits the data well
+
+- For different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. 
+
+- The $\beta_i$ coefficients estimated from the Bayesian model is powerful when predicting the damage and deaths caused by hurricanes
