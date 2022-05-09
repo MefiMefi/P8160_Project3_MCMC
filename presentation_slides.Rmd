@@ -326,16 +326,31 @@ knitr::include_graphics("./rmse.png")
 knitr::include_graphics("./q4_prediction_plot.png")
 ```
 
-# Seasonal Difference Exploration
+# Seasonal Difference Exploration and Wind Change against Year
+* Beyesion model:
+$$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
+\beta_{3,i}\Delta_{i,2}(t) +\beta_{4,i}\Delta_{i,3}(t)  + \epsilon_{i}(t)$$
+* Model 1: $\beta_{j} \sim Month + Year + Nature$
+* Model 2: $\beta_{j} \sim Season$
+* Model 3: $\beta_{j} \sim Year$
+*\beta_{j} corresponds to $\beta_{0} \sim \beta_{4}$ in the Bayesian model
+
+# Seasonal Difference Exploration - Model 1
 ```{r p5_sum, echo=FALSE, out.width = '90%', fig.align='center'}
 knitr::include_graphics("./p5_sum.jpg")
 ```
+* The effect the previous wind speed has will decrease over years
 
-# Seasonal Difference Exploration
+# Seasonal Difference Exploration and Wind Change against Year - Model 2 & 3
 ```{r p5_sum_new, echo=FALSE, out.width = '90%', fig.align='center'}
 knitr::include_graphics("./p5_sum2.jpg")
 knitr::include_graphics("./p5_sum_new.jpg")
 ```
+* Effects $Y_{i,t}$ and $\Delta_{i,3}(t)$ has on the wind speed change across seasons
+```{r p5_sum_new, echo=FALSE, out.width = '90%', fig.align='center'}
+knitr::include_graphics("./p5_sum_new.jpg")
+```
+* The impact of the nearst past wind speed has on current wind speed will decrease across years
 
 # Predictions of Damage and Deaths
 ## Basic plot of Damage and Deaths
