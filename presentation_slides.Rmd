@@ -190,6 +190,16 @@ $$
 
 # MCMC Algorithm
 
+* Monte Carlo Method
+  + Random sampling method to estimate quantity
+
+* Markov Chain
+  + Generates a sequence of random variables where the current state only depends on the nearest past
+
+* Example: Gibbs Sampler
+  + MCMC approaches with known conditional distributions
+  + Samples from each random variables in turn given the value of all the others in the distribution
+
 ## Conditional Posterior
 
 * To apply MCMC using Gibbs sampling, we need to find conditional posterior distribution of each parameter, then we can implement Gibbs sampling on these conditional posterior distributions.
@@ -296,12 +306,13 @@ knitr::include_graphics("./q4_prediction_plot.png")
 ```
 
 # Seasonal Difference Exploration
-```{r p5_sum, echo=FALSE, fig.cap="Fitted results of beta models", out.width = '90%', fig.align='center'}
+```{r p5_sum, echo=FALSE}
 knitr::include_graphics("./p5_sum.jpg")
 ```
 
 # Seasonal Difference Exploration
-```{r p5_sum_new, echo=FALSE, fig.cap="Fitted results of beta models for only the year variable", out.width = '90%', fig.align='center'}
+```{r p5_sum_new, echo=FALSE}
+knitr::include_graphics("./p5_sum2.jpg")
 knitr::include_graphics("./p5_sum_new.jpg")
 ```
 
