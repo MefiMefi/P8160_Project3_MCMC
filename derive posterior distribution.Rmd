@@ -221,6 +221,10 @@ The update of parameters is component wise, at $(t+1)^\text{th}$ step, updating 
 
 * Finally, sample $\boldsymbol{\mu}^{(t+1)}$ from $\mathcal{N}(\frac{1}{n}\sum\limits_{i=1}^{n}{\boldsymbol{\beta}_i}^{(t+1)},\frac{1}{n}{\boldsymbol{\Sigma}}^{(t+1)})$
 
+### Train Test Splits
+
+For model training as well as the performance evaluation of our Bayesian model, we split the dataset into train and test set. We first drop the hurricanes with less than 3 observations, and removed observations without transformed predictors values. Then we got a dataset with 697 different hurricanes. Our train-test split is within each hurricane's observations, that is, for each hurricane, we randomly set 80% of observations to the training set and left 20% to the test set. We then trained Bayesian model based on training data and evaluate the model performance on test dataset. 
+
 ### Inital Values
 
 For a good performance and to speed up the convergence of our algorithm, also keep some uncertainty in the MCMC process, we delicately designed the initial values.
@@ -293,6 +297,28 @@ sigma_summary %>% mutate(
 
 
 The posterior estimates of $\boldsymbol{\mu}$ reflects the population average of our model parameters. For $\boldsymbol{\mu}_0$, which is the parameter of the intercept, it tells us the average wind speed of all hurricanes. $\boldsymbol{\mu}_1$ is the coefficient associated with the previous wind speed, the estimates of it is 0.912 which is positive, means that an increase in the previous wind speed will causes a higher speed for that in the next time. $\boldsymbol{\mu}_2$ and $\boldsymbol{\mu}_3$ are the coefficients associated with the change in latitude and longitude of the hurricane, it seems that an increase in the change of latitude is associated with the increments in wind speed, on the other hand, an increase in the change of longitude is associated with the decrements in wind speed. Finally, the estimated $\boldsymbol{\mu}_4$ is 0.485 > 0, indicating that an increase in the change of wind speed will cause an increase in future wind speed.
+
+The posterior estimate of  $\boldsymbol{\Sigma}$ and the corresponding $\boldsymbol{\rho}$ is
+
+$$\boldsymbol{\Sigma} = 
+\begin{pmatrix}
+0.349 &-0.008&  0.020&  0.013&  0.004\\
+-0.008&  0.003& -0.005& -0.001&  0.0004\\
+0.020& -0.005&  0.296& -0.003& -0.006&\\
+ 0.013& -0.001& -0.003&  0.092&  0.003\\
+ 0.004&  0.0004& -0.006&  0.003&  0.026
+\end{pmatrix},\ \rho =
+\begin{pmatrix}
+1& -0.245&  0.063&  0.073&  0.037\\
+-0.245&  1& -0.174& -0.078&  0.041\\
+0.063& -0.174&  1& -0.019& -0.069\\
+0.073& -0.078& -0.019&  1&  0.070&\\
+0.037&  0.041& -0.069&  0.070&  1
+
+\end{pmatrix}
+$$
+
+From the correlation matrix, we can found that the correlation between $\boldsymbol{\beta}_{j,i}$ $\boldsymbol{\beta}_{k,i}$($j\neq k$) is not that strong.
 
 
 

@@ -195,20 +195,6 @@ $$
   + MCMC approaches with known conditional distributions
   + Samples from each random variables in turn given the value of all the others in the distribution
 
-
-
-# MCMC Algorithm
-
-* Monte Carlo Method
-  + Random sampling method to estimate quantity
-
-* Markov Chain
-  + Generates a sequence of random variables where the current state only depends on the nearest past
-
-* Example: Gibbs Sampler
-  + MCMC approaches with known conditional distributions
-  + Samples from each random variables in turn given the value of all the others in the distribution
-
 ## Conditional Posterior
 
 * To apply MCMC using Gibbs sampling, we need to find conditional posterior distribution of each parameter, then we can implement Gibbs sampling on these conditional posterior distributions.
@@ -245,7 +231,15 @@ The update of parameters is component wise, at $(t+1)^\text{th}$ step, updating 
 
 4. Finally, sample $\boldsymbol{\mu}^{(t+1)}$ from $\mathcal{N}(\frac{1}{n}\sum\limits_{i=1}^{n}{\boldsymbol{\beta}_i}^{(t+1)},\frac{1}{n}{\boldsymbol{\Sigma}}^{(t+1)})$
 
-# MCMC Algorithm - Inital Values
+# MCMC Algorithm - Train-Test split and Inital Values
+
+## Train-test split
+
+- Drop the data of hurricane with less than 3 observations. Results in 697 hurricanes
+
+- Within each hurricane's data, randomly 80% train, 20% test
+
+## Initial Values
 
 1. For initial value of $\textbf{B}$, we run multivariate linear regressions for each hurricane and use the regression coefficients $\boldsymbol{\beta}_i^{MLR}$ as the initial value for $\boldsymbol{\beta_i}$. Then, the initial value of $\textbf{B}$ can be represented as $\textbf{B}_{init} = ({\boldsymbol{\beta}_1^{MLR}}^\top,\dots,{\boldsymbol{\beta}_n^{MLR}}^\top)^\top$.
 
@@ -297,12 +291,26 @@ knitr::include_graphics("./plots/model_param.jpg")
 
 # MCMC Results - Variance Parameter Estimations and Inferences
 
-```{r var_param, echo=FALSE, fig.cap="Bayesian posterior estimates for variance parameters", out.width = '80%', fig.align='center'}
-knitr::include_graphics("./plots/variance_param.jpg")
-```
+$$\boldsymbol{\Sigma} = 
+\begin{pmatrix}
+0.349 &-0.008&  0.020&  0.013&  0.004\\
+-0.008&  0.003& -0.005& -0.001&  0.0004\\
+0.020& -0.005&  0.296& -0.003& -0.006&\\
+ 0.013& -0.001& -0.003&  0.092&  0.003\\
+ 0.004&  0.0004& -0.006&  0.003&  0.026
+\end{pmatrix}
+$$
+$$ \rho =
+\begin{pmatrix}
+1& -0.245&  0.063&  0.073&  0.037\\
+-0.245&  1& -0.174& -0.078&  0.041\\
+0.063& -0.174&  1& -0.019& -0.069\\
+0.073& -0.078& -0.019&  1&  0.070&\\
+0.037&  0.041& -0.069&  0.070&  1
+\end{pmatrix}
+$$
 
 # Bayesian Model Performance 
-
 
 ```{r predict, echo=FALSE, fig.cap="R Squared and RMSE", out.width = '90%', fig.align='center'}
 knitr::include_graphics("./rmse.png")

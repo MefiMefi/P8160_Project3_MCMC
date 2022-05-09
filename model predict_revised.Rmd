@@ -1,0 +1,61 @@
+---
+title: "model predict"
+author: "Shengzhi Luo"
+date: "05/05/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(MASS)
+library(tidyverse)
+library(dplyr)
+library(Metrics)
+```
+
+```{r,include=FALSE}
+load("./MCMC.res.2.RData")
+load("./dt_test_id.RData")
+load("./beta.res.postmean.RData")
+```
+
+```{r}
+beta.res.postmean = beta.res.postmean %>% rename(beta_0 = intercept, beta_1 = Wind_prev, beta_2 = Lat_change,  beta_3 = Long_change, beta_4 = Wind_change)
+
+dt_res = merge(dt_test_id, beta.res.postmean, by = "ID")
+
+dt_res = dt_res %>% 
+  mutate(Wind_kt_pred = beta_0*intercept+beta_1*Wind_prev
+         +beta_2*Lat_change+beta_3*Long_change+beta_4*Wind_change) %>%
+  group_by(ID) %>% 
+  mutate(r_square = 1-(sum((Wind_kt_pred-Wind.kt)^2))/(sum((Wind.kt-mean(Wind.kt))^2)),
+         rmse = rmse(Wind.kt,Wind_kt_pred))
+```
+
+```{r}
+  dt_rmse=
+  dt_res %>% 
+  dplyr::select(ID, r_square, rmse) %>% 
+  distinct() %>% 
+  mutate(r_square = round(r_square, 3),
+         rmse = round(rmse,3)) %>% 
+  filter(r_square > 0 && r_square < 1)
+head(dt_rmse,20) %>% knitr::kable()
+```
+
+```{r}
+dt_res %>% filter(ID %in% c("DOG.1950","MITCH.1998","GINGER.1971","MARILYN.1995")) %>% 
+  mutate(index = 1:n()) %>%
+  ggplot(aes(y = Wind.kt, x = index))+
+  geom_line(aes(color = "Actual Wind Speed"))+
+  geom_line(aes(y = Wind_kt_pred, color = "Predicted Wind Speed"))+
+  facet_wrap(.~ID, nrow = 2, scales = "free")+
+  theme_classic()+
+  labs(x = "Index",
+       y = "Wind Speed",
+       title = "Actual Wind Speed vs. Predicted Wind Speed")
+```
+
+
+
+

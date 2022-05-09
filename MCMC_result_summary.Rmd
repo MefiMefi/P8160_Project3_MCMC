@@ -384,3 +384,13 @@ nse.beta = sqrt(1/20*((b1-bbar)^2 + (b2-bbar)^2 + (b3-bbar)^2 + (b4-bbar)^2 + (b
 
 ```
 
+```{r}
+s = c(sigma_summary$estimates[1:15])
+Sig = matrix(NA, 5, 5)
+Sig[lower.tri(Sig, diag = T)] = s
+Sig[upper.tri(Sig)] <- t(Sig)[upper.tri(Sig)]
+rou = cov2cor(Sig)
+save(Sig, file = "./estimate_Sigma.RData")
+save(rou, file = "./estimate_rou.RData")
+```
+
