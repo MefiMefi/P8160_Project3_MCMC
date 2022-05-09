@@ -278,12 +278,109 @@ param_summary = tibble(
     variable_name = names(beta.res.postmean[1:5]),
     mean_beta = colMeans(beta.res.postmean[,1:5]),
     var_beta = c(var.beta0, var.beta1, var.beta2, var.beta3, var.beta4),
-    ci_beta_lower = mean_beta + qnorm(.025)*var_beta,
-    ci_beta_upper = mean_beta + qnorm(.975)*var_beta,
+    ci_beta_lower = mean_beta + qnorm(.025)*sqrt(var_beta),
+    ci_beta_upper = mean_beta + qnorm(.975)*sqrt(var_beta),
     mu = colMeans(mu.res.plot),
     var_mu = c(var.mu0, var.mu1, var.mu2, var.mu3, var.mu4),
-    ci_mu_lower = mu + qnorm(.025)*var_mu,
-    ci_mu_upper = mu + qnorm(.975)*var_mu,
+    ci_mu_lower = mu + qnorm(.025)*sqrt(var_mu),
+    ci_mu_upper = mu + qnorm(.975)*sqrt(var_mu),
 )
 save(param_summary, file = "param_summary.RData")
 ```
+
+```{r summary_param_sigmas}
+#dev.off()
+#plot(sigma.res.plot[,1],type = "l", main = bquote("Trace plot of "~ sigma^2), ylab = bquote(sigma^2))
+#abline(v = 5001, col = 2, lty = 4)
+
+#plot(sigma.res.plot.bad[5001:10000,1],type = "l", main = bquote("Trace plot of "~ sigma^2), ylab = bquote(sigma^2))
+
+Sigma.res.plot = NULL
+for (i in 1:10000) {
+    Sigma.res = MCMC.res.2$Sigma[[i]]
+    Sigma.res = as.data.frame(t(Sigma.res[lower.tri(Sigma.res, diag = T)]))
+    Sigma.res.plot = rbind(Sigma.res.plot, Sigma.res)
+}
+
+
+par(mfrow = c(4, 4))
+plot(Sigma.res.plot[,1],type = "l", main = bquote("Trace plot of "~ Sigma[11]), ylab = bquote(Sigma[11]))
+plot(Sigma.res.plot[,2],type = "l", main = bquote("Trace plot of "~ Sigma[12]), ylab = bquote(Sigma[12]))
+plot(Sigma.res.plot[,3],type = "l", main = bquote("Trace plot of "~ Sigma[13]), ylab = bquote(Sigma[13]))
+plot(Sigma.res.plot[,4],type = "l", main = bquote("Trace plot of "~ Sigma[14]), ylab = bquote(Sigma[14]))
+plot(Sigma.res.plot[,5],type = "l", main = bquote("Trace plot of "~ Sigma[15]), ylab = bquote(Sigma[15]))
+plot(Sigma.res.plot[,6],type = "l", main = bquote("Trace plot of "~ Sigma[22]), ylab = bquote(Sigma[22]))
+plot(Sigma.res.plot[,7],type = "l", main = bquote("Trace plot of "~ Sigma[23]), ylab = bquote(Sigma[23]))
+plot(Sigma.res.plot[,8],type = "l", main = bquote("Trace plot of "~ Sigma[24]), ylab = bquote(Sigma[24]))
+plot(Sigma.res.plot[,9],type = "l", main = bquote("Trace plot of "~ Sigma[25]), ylab = bquote(Sigma[25]))
+plot(Sigma.res.plot[,10],type = "l", main = bquote("Trace plot of "~ Sigma[33]), ylab = bquote(Sigma[33]))
+plot(Sigma.res.plot[,11],type = "l", main = bquote("Trace plot of "~ Sigma[34]), ylab = bquote(Sigma[34]))
+plot(Sigma.res.plot[,12],type = "l", main = bquote("Trace plot of "~ Sigma[35]), ylab = bquote(Sigma[35]))
+plot(Sigma.res.plot[,13],type = "l", main = bquote("Trace plot of "~ Sigma[44]), ylab = bquote(Sigma[44]))
+plot(Sigma.res.plot[,14],type = "l", main = bquote("Trace plot of "~ Sigma[45]), ylab = bquote(Sigma[45]))
+plot(Sigma.res.plot[,15],type = "l", main = bquote("Trace plot of "~ Sigma[55]), ylab = bquote(Sigma[55]))
+plot(sigma.res.plot[,1],type = "l", main = bquote("Trace plot of "~ sigma^2), ylab = bquote(sigma^2))
+
+
+par(mfrow = c(4, 4))
+hist(Sigma.res.plot[5001:10000,1], main = bquote("Histogram of "~ Sigma[11]), xlab = bquote(Sigma[11]))
+hist(Sigma.res.plot[5001:10000,2], main = bquote("Histogram of "~ Sigma[12]), xlab = bquote(Sigma[12]))
+hist(Sigma.res.plot[5001:10000,3], main = bquote("Histogram of "~ Sigma[13]), xlab = bquote(Sigma[13]))
+hist(Sigma.res.plot[5001:10000,4], main = bquote("Histogram of "~ Sigma[14]), xlab = bquote(Sigma[14]))
+hist(Sigma.res.plot[5001:10000,5], main = bquote("Histogram of "~ Sigma[15]), xlab = bquote(Sigma[15]))
+hist(Sigma.res.plot[5001:10000,6], main = bquote("Histogram of "~ Sigma[22]), xlab = bquote(Sigma[22]))
+hist(Sigma.res.plot[5001:10000,7], main = bquote("Histogram of "~ Sigma[23]), xlab = bquote(Sigma[23]))
+hist(Sigma.res.plot[5001:10000,8], main = bquote("Histogram of "~ Sigma[24]), xlab = bquote(Sigma[24]))
+hist(Sigma.res.plot[5001:10000,9], main = bquote("Histogram of "~ Sigma[25]), xlab = bquote(Sigma[25]))
+hist(Sigma.res.plot[5001:10000,10], main = bquote("Histogram of "~ Sigma[33]), xlab = bquote(Sigma[33]))
+hist(Sigma.res.plot[5001:10000,11], main = bquote("Histogram of "~ Sigma[34]), xlab = bquote(Sigma[34]))
+hist(Sigma.res.plot[5001:10000,12], main = bquote("Histogram of "~ Sigma[35]), xlab = bquote(Sigma[35]))
+hist(Sigma.res.plot[5001:10000,13], main = bquote("Histogram of "~ Sigma[44]), xlab = bquote(Sigma[44]))
+hist(Sigma.res.plot[5001:10000,14], main = bquote("Histogram of "~ Sigma[45]), xlab = bquote(Sigma[45]))
+hist(Sigma.res.plot[5001:10000,15], main = bquote("Histogram of "~ Sigma[55]), xlab = bquote(Sigma[55]))
+hist(sigma.res.plot[5001:10000,1], main = bquote("Histogram of "~ sigma^2), xlab = bquote(sigma^2))
+
+```
+
+```{r sigma_summary}
+sigma_summary = tibble(
+    parameter = c(
+        "$\\Sigma_{11}$",
+        "$\\Sigma_{12}$",
+        "$\\Sigma_{13}$",
+        "$\\Sigma_{14}$",
+        "$\\Sigma_{15}$",
+        "$\\Sigma_{22}$",
+        "$\\Sigma_{23}$",
+        "$\\Sigma_{24}$",
+        "$\\Sigma_{25}$",
+        "$\\Sigma_{33}$",
+        "$\\Sigma_{34}$",
+        "$\\Sigma_{35}$",
+        "$\\Sigma_{44}$",
+        "$\\Sigma_{45}$",
+        "$\\Sigma_{55}$",
+        "$\\sigma^2$"
+        ),
+    estimates = c(colMeans(Sigma.res.plot[5001:10000,], na.rm = T),mean(sigma.res.plot[5001:10000,])),
+    variance = c(sapply(Sigma.res.plot[5001:10000,], var), var(sigma.res.plot[5001:10000,])),
+    CI_L = estimates + qnorm(.025)*sqrt(variance),
+    CI_U = estimates + qnorm(.975)*sqrt(variance)
+)
+save(sigma_summary, file = "sigma_summary.RData")
+```
+
+```{r nse_batching}
+b1 = colMeans(beta.res.plot[5001:6000,])
+b2 = colMeans(beta.res.plot[6001:7000,])
+b3 = colMeans(beta.res.plot[7001:8000,])
+b4 = colMeans(beta.res.plot[8001:9000,])
+b5 = colMeans(beta.res.plot[9001:10000,])
+
+bbar = colMeans(beta.res.plot[5001:10000,])
+
+nse.beta = sqrt(1/20*((b1-bbar)^2 + (b2-bbar)^2 + (b3-bbar)^2 + (b4-bbar)^2 + (b5-bbar)^2))
+
+
+```
+
