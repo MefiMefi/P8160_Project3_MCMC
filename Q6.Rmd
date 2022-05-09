@@ -1,0 +1,165 @@
+---
+title: "Q6 5.8"
+author: "Wentong"
+date: "5/8/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(base)
+library(caret)
+library(corrplot)
+library(plotmo)
+```
+
+
+```{r}
+load("beta.res.postmean.Rdata")
+dat = read.csv("hurricanoutcome2.csv") %>% 
+  rename(id = HurricanID)
+
+dat$Deaths = gsub(",","",dat$Deaths)
+dat$Damage = gsub("\\$", "", dat$Damage)
+dat_q6 = dat %>% 
+  mutate(Damage = as.numeric(Damage),
+         Deaths = as.numeric(Deaths),
+         Season = as.numeric(Season),
+         Maxspeed = as.numeric(Maxspeed),
+         Month = as.factor(Month),
+         Nature = as.factor(Nature))
+
+plot(dat_q6$Damage, xlab = "Hurricanes", ylab = "Damage")
+plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths")
+
+```
+
+```{r}
+## Import Data
+dat_hur = read.csv("hurrican703.csv") %>% 
+  janitor::clean_names() %>%
+  group_by(id) %>% 
+  mutate(id = tolower(id),
+         wind_early = lag(wind_kt, 1),
+         lat_change = lag(latitude, 0) - lag(latitude, 1),
+         long_change = lag(longitude, 0) - lag(longitude, 1),
+         wind_change = lag(wind_kt, 0) - lag(wind_kt, 1)) %>% 
+  na.omit() %>% 
+  as.data.frame()
+
+dat_before = beta.res.postmean %>% 
+  rename(id = ID) %>% 
+  mutate(id = tolower(id))
+
+combine_data = merge(dat_before, dat_hur, by = "id") %>% 
+  rename(beta1 = Wind_prev, beta2 = Lat_change, beta3 = Long_change, beta4 = Wind_change) %>% 
+  dplyr::select(id, season, month, nature, intercept, beta1, beta2, beta3, beta4, wind_early, lat_change, long_change, wind_change)
+
+combine.data2 = combine_data %>% 
+  dplyr::select(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  group_by(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  summarize(nobs = n())
+
+data_res = merge(combine.data2, dat_q6, by = "id")
+data_res = data_res %>% 
+  mutate(nobs = as.numeric(nobs),
+         Maxpressure = as.numeric(Maxpressure),
+         Hours = as.numeric(Hours),
+         Total.Pop = as.numeric(Total.Pop))
+
+save(data_res,file ="./tables/data_res.RData")
+
+Coef_table = data_res %>% 
+  dplyr::select(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  knitr::kable(digits = 3, 
+               col.names = c(
+                   "ID",
+                   "$\\beta_0$",
+                   "$\\beta_1$",
+                   "$\\beta_2$",
+                   "$\\beta_3$",
+                   "$\\beta_4$"
+               ),
+               escape = F
+               )
+
+Coef_table %>% head(10)
+
+```
+
+```{r}
+data_damage = data_res %>% 
+  dplyr::select(-c(id, Deaths)) %>% 
+  mutate(Damage = 1000*Damage)
+
+require(broom)
+damage.fit = glm(Damage ~., data = data_damage, family = "poisson"(link = "log"))
+summary(damage.fit)
+damage.tidy = tidy(damage.fit) %>% na.omit() %>% 
+    mutate(
+        term = case_when(
+            term == "intercept"~"$\\beta_0$",
+            term == "beta1"~"$\\beta_1$",
+            term == "beta2"~"$\\beta_2$",
+            term == "beta3"~"$\\beta_3$",
+            term == "beta4"~"$\\beta_4$",
+            TRUE ~ term
+            
+        )
+    )
+
+df_total = data.frame()
+coef_res = function(table){
+  for (i in 1:22) {
+    df = table[i,]
+    if(table[i,5]<0.05){df_total = rbind(df_total, df) 
+    i = i + 1}
+    else{i = i +1}
+  }
+  return(df_total)
+}
+
+damage.tidy = coef_res(damage.tidy)
+
+save(damage.tidy, file = "./tables/damage.tidy.RData")
+```
+
+```{r}
+library(glmnet)
+data_deaths = data_res %>% 
+  dplyr::select(-c(id, Damage))
+
+deaths.fit = glm(Deaths ~ ., data = data_deaths, family = "poisson")
+
+deaths.tidy = tidy(deaths.fit) %>% na.omit()%>% 
+    mutate(
+        term = case_when(
+            term == "intercept"~"$\\beta_0$",
+            term == "beta1"~"$\\beta_1$",
+            term == "beta2"~"$\\beta_2$",
+            term == "beta3"~"$\\beta_3$",
+            term == "beta4"~"$\\beta_4$",
+            TRUE ~ term
+            
+        )
+    )
+
+
+deaths.tidy = coef_res(deaths.tidy)
+save(deaths.tidy, file = "./tables/deaths.tidy.RData")
+```
+
+
+## Comments
+The poisson model used in predicting deaths and damage is:
+
+\begin{center}
+$log(Damage*1000 or Deaths) = \beta_{i}X_{i}$
+\end{center}
+
+
+- where $X_{i}$ includes $\beta_{0}  \sim  \beta_{4}$ and the predictors in new data
+- convert `Damage` units from billions to millions to get integer data
+
+## Predict the hurricane-induced damage and deaths
