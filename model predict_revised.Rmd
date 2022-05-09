@@ -11,10 +11,11 @@ library(MASS)
 library(tidyverse)
 library(dplyr)
 library(Metrics)
+library(gridExtra)
+library(grid)
 ```
 
 ```{r,include=FALSE}
-load("./MCMC.res.2.RData")
 load("./dt_test_id.RData")
 load("./beta.res.postmean.RData")
 ```
@@ -39,21 +40,29 @@ dt_res = dt_res %>%
   distinct() %>% 
   mutate(r_square = round(r_square, 3),
          rmse = round(rmse,3)) %>% 
-  filter(r_square > 0 && r_square < 1)
-head(dt_rmse,20) %>% knitr::kable()
+  filter(r_square > 0 && r_square < 1) %>% 
+  arrange(rmse)
+mean(dt_rmse$r_square)
+mean(dt_rmse$rmse)
+df = head(dt_rmse,10) 
+png("rmse.png",  height = 25*nrow(df), width = 100*ncol(df), bg = "white")
+grid.table(df)
+dev.off()
 ```
 
 ```{r}
-dt_res %>% filter(ID %in% c("DOG.1950","MITCH.1998","GINGER.1971","MARILYN.1995")) %>% 
+png("q4_prediction_plot.png", width = 2000, height = 1000)
+dt_res %>% filter(ID %in% c( "ERIN.2013","EDITH.1967","DEBBY.2006","GUSTAV.1996")) %>% 
   mutate(index = 1:n()) %>%
   ggplot(aes(y = Wind.kt, x = index))+
   geom_line(aes(color = "Actual Wind Speed"))+
   geom_line(aes(y = Wind_kt_pred, color = "Predicted Wind Speed"))+
-  facet_wrap(.~ID, nrow = 2, scales = "free")+
+  facet_wrap(.~ID, nrow = 2, scales = "free") +
   theme_classic()+
   labs(x = "Index",
        y = "Wind Speed",
        title = "Actual Wind Speed vs. Predicted Wind Speed")
+dev.off()
 ```
 
 
