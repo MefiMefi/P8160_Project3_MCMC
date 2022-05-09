@@ -188,24 +188,24 @@ Gibbs Sampler is one of Bayesian MCMC approaches with known conditional distribu
 
 We evaluate the performance of predictive ability by calculating the RMSE and the $R^2$ values for each hurricane. The residuals of Bayesian estimates that converged after iterations from MCMC will be used to predict the wind speed of test dataset.
 The overall $R^2$ is 0.822 and overall RMSE is 4.51. The valid $R^2$ is filtered with values between 0 and 1 and we get 77.5% hurriacanes (540) indicating that 22.5% of the estimated Bayesian models do not track hurricanes well and have negative $R^2$. One of the reason may be the limited number of observations of the hurricanes.
-Figure 7 shows the 10 hurriances with the least 10 RMSE. $R^2$ are also large enough to indicates that the estimated model track most hurricanes well and the smallest RMSE is GUSTAV.1996 with $R^2$ being 0.952. 
+Table 1 shows the 10 hurricanes with the least 10 RMSE. $R^2$ are also large enough to indicates that the estimated model track most hurricanes well and the smallest RMSE is GUSTAV.1996 with $R^2$ being 0.952. 
 
 ```{r predict, echo=FALSE}
 load("./tables/dt_rmse.RData")
 dt_rmse %>% head(10) %>% knitr::kable(digits = 3)
 ```
 \begin{center}
-Figure 7. R-square and RMSE for prediction result on test data
+Table 1. R-square and RMSE for prediction result on test data
 \end{center}
 
-Figure 8 shows the actual wind speed and the estimated wind speed of randomly selected four hurricanes . We can see that most parts of the two curves overlapped indicating that the predicted values are close to the actual values. In DEBBY.2006, we can see that this is a very good model prediction with small deviation. 
+Figure 7 shows the actual wind speed and the estimated wind speed of randomly selected four hurricanes . We can see that most parts of the two curves overlapped indicating that the predicted values are close to the actual values. In DEBBY.2006, we can see that this is a very good model prediction with small deviation. 
 
 
 ```{r performance, echo=FALSE, out.width = '90%', fig.align='center'}
 knitr::include_graphics("./q4_prediction_plot.png")
 ```
 \begin{center}
-Figure 8. Actual Wind Speed vs. Predicted Wind Speed
+Figure 7. Actual Wind Speed vs. Predicted Wind Speed
 \end{center}
 
 
@@ -227,7 +227,7 @@ p5_sum %>% knitr::kable(digits = 3, col.names = c("Est0", "pval", "Est1", "pval"
   kableExtra::kable_styling(bootstrap_options = c("condensed"))
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against three predictors
+Table 2. Coefficients of the fitted $\beta$ model against three predictors
 \end{center}
 
 We also try to represent the months as four seasons and fit a model for $\beta$ against them. Each model has three dummy variables corresponding to the three seasons except Spring. The latter three rows of estimate shows how the value of $\beta$ differentiate between Spring and the other three seasons respectively. If with a rather small p-value, we can conclude the existence of seasonal difference. Therefore, by constructing model in this way, we find that $\beta_1$ and $\beta_4$ will increase a little as season changes from Spring to Summer, then to Autumn, which means a season difference of the effect $Y_{i,t}$ and $\Delta_{i,3}(t)$ has on the wind speed. For $\beta_2$, $\beta_3$, Summer and Autumn may lead to a slightly smaller effect of $\Delta_{i,1}(t)$, $\Delta_{i,2}(t)$ have on the wind speed compared to Spring.
@@ -238,7 +238,7 @@ p5_sum2 %>% knitr::kable(digits = 3, col.names = c("Est0", "pval", "Est1", "pval
   kableExtra::kable_styling(bootstrap_options = c("condensed"))
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against season
+Table 3. Coefficients of the fitted $\beta$ model against season
 \end{center}
 
 Now fit linear models for $\beta$ against the season variables (corresponding to the year) to seek for potential evidence of the statement :"the wind speed has been increasing over years". In order to analyze this question, need to inspect on model which corresponds to the wind speed and the year. For $\beta_{2}$ model, the estimate of year is significant, although it's really close to zero. Therefore, we can infer that as the year increases, the impact past wind speed has on the current wind speed may decrease a little, which cannot provide support for the statement. However, it's quite match with the results shown in the figures in the initial EDA session, which indicates the mean wind speed tends to decrease over years.
@@ -249,7 +249,7 @@ p5_sum_new %>% knitr::kable(digits = 3, col.names = c("Est0", "pval", "Est1", "p
   kableExtra::kable_styling(bootstrap_options = c("condensed"))
 ```
 \begin{center}
-Table 99. Coefficients of the fitted $\beta$ model against year
+Table 4. Coefficients of the fitted $\beta$ model against year
 \end{center}
 
 In conclusion, for different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. And there is no evidence to support the statement in task 5.
@@ -266,10 +266,7 @@ library(plotmo)
 ```
 
 ## Predict the hurricane-induced damage and deaths
-Firstly, we plot deaths and financial loss separately. Figure 99. shows the distributions of deaths and damage. We could easily find a few points which are far away from most of the points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enable the model to predict the worst outcome. Therefore, we keep these points in model building.
-\begin{center}
-Figure 99. Distributions of Damage and Deaths
-\end{center}
+Firstly, we plot deaths and financial loss separately. Figure 8. shows the distributions of deaths and damage. We could easily find a few points which are far away from most of the points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enable the model to predict the worst outcome. Therefore, we keep these points in model building.
 
 ```{r, echo=FALSE}
 load("beta.res.postmean.Rdata")
@@ -290,12 +287,14 @@ par(mfrow=c(1,2))
 plot(dat_q6$Damage, xlab = "Hurricanes", ylab = "Damage")
 plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths")
 ```
-
-In order to build a model that combines information in original data and the estimated coefficients from the Bayesian model, we extract the coefficients from the previous results. By taking the average of $\beta_{i}$ at different time points, we obtain $\beta_{0}  \sim  \beta_{4}$ of each hurricane. Part of the results is shown in Table 99.
-
 \begin{center}
-Table 99. Coefficients of Each Hurricane
+Figure 8. Distributions of Damage and Deaths
 \end{center}
+
+In order to build a model that combines information in original data and the estimated coefficients from the Bayesian model, we extract the coefficients from the previous results. By taking the average of $\beta_{i}$ at different time points, we obtain $\beta_{0}  \sim  \beta_{4}$ of each hurricane. Part of the results is shown in Table 5.
+
+\newpage
+
 ```{r, echo=FALSE, message=FALSE}
 load("beta.res.postmean.Rdata")
 dat = read.csv("hurricanoutcome2.csv") %>% 
@@ -344,6 +343,9 @@ Coef_table = data_res %>%
 
 Coef_table
 ```
+\begin{center}
+Table 5. Coefficients of Each Hurricane
+\end{center}
 
 Fortunately, 43 hurricanes recorded in $hurricanoutcome2.csv$ are also in $hurrican703.csv$. Thus, we merge two data frame by hurricane id to predict the deaths and damage caused by hurricanes.
 
@@ -353,10 +355,9 @@ The death variable is a count variable, so we decided to use Poisson regression 
 $log(E(Deaths)) = \beta_{i}X_{i} + offset$
 \end{center}
 
-Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 99.
-\begin{center}
-Table 99. Coefficients of Deaths Prediction
-\end{center}
+Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 6.
+
+
 ```{r, echo=FALSE}
 data_deaths = data_res %>% 
   select(-c(id, Damage))
@@ -366,6 +367,9 @@ deaths.fit = glm(Deaths ~ . + offset(log(offset_pop)) + offset(log(offset_dur)),
 deaths.tidy = summary(deaths.fit) %>% na.omit()
 knitr::kable(deaths.tidy$coefficients, digits = 3)
 ```
+\begin{center}
+Table 6. Coefficients of Deaths Prediction
+\end{center}
 
 From the results, $\beta_{0}  \sim  \beta_{4}$ indicate the relatively strong association. Especially, $\beta_{1}$, which represents the earlier wind speed has the biggest coefficient. We could conclude that high wind speed of hurricane more easily leads to serious casualties. Also, months seem to be an important factor in prediction. Comparing to June and September, July, November and October have lower proportion of death given all other variables constant. 
 
@@ -375,7 +379,7 @@ In order to obtain the integer data, we transform the units of `Damage` from bil
 $log(E(Damage*1000)) = \beta_{i}X_{i} + offset$
 \end{center}
 
-Where $X_{i}$ presents all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients results is in Table 99.
+Where $X_{i}$ presents all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients results is in Table 7.
 
 ```{r, echo=FALSE, message=FALSE, include=FALSE}
 df_total = data.frame()
@@ -405,6 +409,9 @@ damage.tidy = tidy(damage.fit)
 table6 = knitr::kable(damage.tidy, digits = 3)
 table6
 ```
+\begin{center}
+Table 7. Coefficients of Damage Prediction
+\end{center}
 
 The results of coefficients in predicting damage also show the importance of $\beta_{1}$. From the model, we can see that serious casualties are also accompanied by serious financial losses which are strongly influenced by earlier wind speed and are slightly affected by months, latitude change, longitude change and wind speed change. $\beta_{0}  \sim  \beta_{4}$ are generally powerful in damage and deaths prediction.
 
