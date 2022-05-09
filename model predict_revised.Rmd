@@ -45,14 +45,30 @@ dt_res = dt_res %>%
 mean(dt_rmse$r_square)
 mean(dt_rmse$rmse)
 df = head(dt_rmse,10) 
+save(dt_rmse, file = "./tables/dt_rmse.RData")
 png("rmse.png",  height = 25*nrow(df), width = 100*ncol(df), bg = "white")
 grid.table(df)
 dev.off()
 ```
 
 ```{r}
+hurricanes = read.csv("hurrican703.csv")
+hurricanes_count = hurricanes %>% group_by(ID) %>% summarize(nobs = n()) %>% dplyr::select(c("ID","nobs"))
+dt_rmse_plot = merge(hurricanes_count, dt_rmse,by = "ID") 
+```
+
+```{r}
+dt_rmse[,1:2] %>% pivot_longer(r_square, names_to = "statistics", values_to = "value") %>% 
+    ggplot(aes(y = value, group = statistics, col = statistics)) + geom_boxplot()
+
+dt_rmse_plot %>% ggplot(aes(x = nobs, y = r_square, group = ID)) + geom_point()
+```
+
+
+
+```{r}
 png("q4_prediction_plot.png", width = 2000, height = 1000)
-dt_res %>% filter(ID %in% c( "ERIN.2013","EDITH.1967","DEBBY.2006","GUSTAV.1996")) %>% 
+dt_res %>% filter(ID %in% c( "CAMILLE.1969","AGNES.1972","IVAN.2004","SANDY.2012")) %>% 
   mutate(index = 1:n()) %>%
   ggplot(aes(y = Wind.kt, x = index))+
   geom_line(aes(color = "Actual Wind Speed"))+

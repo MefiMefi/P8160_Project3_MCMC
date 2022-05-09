@@ -309,6 +309,7 @@ $$\boldsymbol{\Sigma} =
  0.004&  0.0004& -0.006&  0.003&  0.026
 \end{pmatrix}
 $$
+
 $$ \rho =
 \begin{pmatrix}
 1& -0.245&  0.063&  0.073&  0.037\\
@@ -321,8 +322,13 @@ $$
 
 # Bayesian Model Performance 
 
-```{r predict, echo=FALSE, fig.cap="R Squared and RMSE", out.width = '90%', fig.align='center'}
-knitr::include_graphics("./rmse.png")
+- The overall mean $R^2$ is 0.82245
+
+- The overall mean RMSE is 4.51023
+
+```{r predict, echo=FALSE}
+load("./tables/dt_rmse.RData")
+dt_rmse %>% head(10) %>% knitr::kable(digits = 3, caption = "R-square and RMSE for prediction result on test data")
 ```
 
 # Bayesian Model Performance 
@@ -334,6 +340,7 @@ knitr::include_graphics("./q4_prediction_plot.png")
 # Seasonal Difference Exploration and Wind Change against Year
 
 * Bayesion model:
+
 $$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
 \beta_{3,i}\Delta_{i,2}(t) +\beta_{4,i}\Delta_{i,3}(t)  + \epsilon_{i}(t)$$
 
@@ -468,3 +475,10 @@ deaths.tidy %>% knitr::kable(digits = 3, escape = F, caption = "Coefficients of 
 - For different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. 
 
 - Th $\beta_i$ coefficients estimated from the Bayesian model is powerful when predicting the damage and deaths caused by hurricanes
+
+
+# Limitations
+
+- Different initial values
+
+- Low performance on hurricanes with few observations
