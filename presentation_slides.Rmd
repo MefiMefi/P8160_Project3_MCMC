@@ -19,6 +19,11 @@ header-includes:
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = F, warning = F, message = F)
+library(base)
+library(caret)
+library(corrplot)
+library(plotmo)
+library(kableExtra)
 ```
 
 # Introduction
@@ -327,30 +332,51 @@ knitr::include_graphics("./q4_prediction_plot.png")
 ```
 
 # Seasonal Difference Exploration and Wind Change against Year
-* Beyesion model:
+
+* Bayesion model:
 $$Y_{i}(t+6) =\beta_{0,i}+\beta_{1,i}Y_{i}(t) + \beta_{2,i}\Delta_{i,1}(t)+
 \beta_{3,i}\Delta_{i,2}(t) +\beta_{4,i}\Delta_{i,3}(t)  + \epsilon_{i}(t)$$
+
 * Model 1: $\beta_{j} \sim Month + Year + Nature$
+
 * Model 2: $\beta_{j} \sim Season$
+
 * Model 3: $\beta_{j} \sim Year$
-*\beta_{j} corresponds to $\beta_{0} \sim \beta_{4}$ in the Bayesian model
+
+* $\beta_{j}$ corresponds to $\beta_{0} \sim \beta_{4}$ in the Bayesian model
 
 # Seasonal Difference Exploration - Model 1
-```{r p5_sum, echo=FALSE, out.width = '90%', fig.align='center'}
-knitr::include_graphics("./p5_sum.jpg")
+
+```{r p5_sum, echo=FALSE}
+load("./tables/total_sum.RData")
+total_sum %>% knitr::kable(digits = 3) %>% 
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed"), font_size = 5) %>% 
+  add_header_above(c(" " = 1, "$\\beta_0$" = 2, "$\\beta_1$" = 2, "$\\beta_2$" = 2, "$\\beta_3$" = 2, "$\\beta_4$" = 2), escape = F)
 ```
+
 * The effect the previous wind speed has will decrease over years
 
-# Seasonal Difference Exploration and Wind Change against Year - Model 2 & 3
-```{r p5_sum_new, echo=FALSE, out.width = '90%', fig.align='center'}
-knitr::include_graphics("./p5_sum2.jpg")
-knitr::include_graphics("./p5_sum_new.jpg")
+# Model 2
+
+- Regress $\beta_j$ only using Season as predictor
+
+```{r p5_sum_new, echo=FALSE}
+load("./tables/season_sum.RData")
+season_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 6)
 ```
+
 * Effects $Y_{i,t}$ and $\Delta_{i,3}(t)$ has on the wind speed change across seasons
-```{r p5_sum_new, echo=FALSE, out.width = '90%', fig.align='center'}
-knitr::include_graphics("./p5_sum_new.jpg")
+
+# Model 3
+
+- Regress $\beta_j$ only using Year as predictor
+
+```{r p5_sum_new2, echo=FALSE}
+load("./tables/year_sum.RData")
+year_sum %>% knitr::kable(digits = 3, escape = F) %>% kable_styling(font_size = 8)
 ```
-* The impact of the nearst past wind speed has on current wind speed will decrease across years
+
+* The impact of the nearest past wind speed has on current wind speed will decrease across years
 
 # Predictions of Damage and Deaths
 ## Basic plot of Damage and Deaths
@@ -379,40 +405,12 @@ plot(dat_q6$Damage, xlab = "Hurricanes", ylab = "Damage", pch = 15, col = "blue"
 ```{r, echo=FALSE}
 plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths", pch = 15, col = "red")
 ```
-# Code
-
-```{r setup_2, include=FALSE}
-library(tidyverse)
-library(base)
-library(caret)
-library(corrplot)
-library(plotmo)
-library(kableExtra)
-```
-
-
-```{r}
-load("beta.res.postmean.Rdata")
-dat = read.csv("hurricanoutcome2.csv") %>% 
-  rename(id = HurricanID)
-
-dat$Deaths = gsub(",","",dat$Deaths)
-dat$Damage = gsub("\\$", "", dat$Damage)
-dat_q6 = dat %>% 
-  mutate(Damage = as.numeric(Damage),
-         Deaths = as.numeric(Deaths),
-         Season = as.numeric(Season),
-         Maxspeed = as.numeric(Maxspeed),
-         Month = as.factor(Month),
-         Nature = as.factor(Nature))
-
-```
 
 # Generalized Linear Model - Poisson
 The poisson model used in predicting deaths and damage is:
 
 \begin{center}
-$log(Damage*1000 or Deaths) = \beta_{i}X_{i}$
+$log(Damage*1000 \text{ or } Deaths) = \beta_{i}X_{i}$
 \end{center}
 
 
@@ -469,4 +467,4 @@ deaths.tidy %>% knitr::kable(digits = 3, escape = F, caption = "Coefficients of 
 
 - For different months, there is no significant differences observed. Over years, the effect the wind speed 6 months ago has on the current wind speed may decrease a little. 
 
-- The $\beta_i$ coefficients estimated from the Bayesian model is powerful when predicting the damage and deaths caused by hurricanes
+- Th $\beta_i$ coefficients estimated from the Bayesian model is powerful when predicting the damage and deaths caused by hurricanes
