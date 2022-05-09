@@ -175,3 +175,157 @@ dt_long %>%
 \begin{center}
 Figure 6. Average Speed (knot) of Hurricanes in Each Nature
 \end{center}
+
+
+
+```{r, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(base)
+library(caret)
+library(corrplot)
+library(plotmo)
+```
+
+## Predict the hurricane-induced damage and deaths
+Firstly, we plot deaths and financial loss separately. Figure 99. shows the distributions of deaths and damage. We could easily find that a few points which are far away from most of points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enables the model the ability to predict the worst outcome. Therefore, we keep these points in model building.
+\begin{center}
+Figure 99. Distributions of Damage and Deaths
+\end{center}
+
+```{r, echo=FALSE}
+load("beta.res.postmean.Rdata")
+dat = read.csv("hurricanoutcome2.csv") %>% 
+  rename(id = HurricanID)
+
+dat$Deaths = gsub(",","",dat$Deaths)
+dat$Damage = gsub("\\$", "", dat$Damage)
+dat_q6 = dat %>% 
+  mutate(Damage = as.numeric(Damage),
+         Deaths = as.numeric(Deaths),
+         Season = as.numeric(Season),
+         Maxspeed = as.numeric(Maxspeed),
+         Month = as.factor(Month),
+         Nature = as.factor(Nature))
+
+par(mfrow=c(1,2))
+plot(dat_q6$Damage, xlab = "Hurricanes", ylab = "Damage")
+plot(dat_q6$Deaths, xlab = "Hurricanes", ylab = "Deaths")
+```
+
+In order to build a model that combines information in original data and the estimated coefficients from the Bayesian model, we extract the coefficients from the previous results. By taking the average of $\beta_{i}$ at different time points, we obtain $\beta_{0}  \sim  \beta_{4}$ of each hurricane. Part of the results is shown in Table 99.
+
+\begin{center}
+Table 99. Coefficients of Each Hurricane
+\end{center}
+```{r, echo=FALSE, message=FALSE}
+load("beta.res.postmean.Rdata")
+dat = read.csv("hurricanoutcome2.csv") %>% 
+  rename(id = HurricanID)
+
+dat$Deaths = gsub(",","",dat$Deaths)
+dat$Damage = gsub("\\$", "", dat$Damage)
+dat_q6 = dat %>% 
+  mutate(Damage = as.numeric(Damage),
+         Deaths = as.numeric(Deaths),
+         Season = as.numeric(Season),
+         Maxspeed = as.numeric(Maxspeed),
+         Month = as.factor(Month),
+         Nature = as.factor(Nature))
+dat_hur = read.csv("hurrican703.csv") %>% 
+  janitor::clean_names() %>%
+  group_by(id) %>% 
+  mutate(id = tolower(id),wind_early = lag(wind_kt, 1)) %>% 
+  na.omit() %>% 
+  as.data.frame()
+
+dat_before = beta.res.postmean %>% 
+  rename(id = ID) %>% 
+  mutate(id = tolower(id))
+
+combine_data = merge(dat_before, dat_hur, by = "id") %>% 
+  rename(beta1 = Wind_prev, beta2 = Lat_change, beta3 = Long_change, beta4 = Wind_change) %>% 
+  select(id, season, month, nature, intercept, beta1, beta2, beta3, beta4)
+
+combine.data2 = combine_data %>% 
+  select(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  group_by(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  summarize(nobs = n())
+
+data_res = merge(combine.data2, dat_q6, by = "id")
+data_res = data_res %>% 
+  mutate(nobs = as.numeric(nobs),
+         Maxpressure = as.numeric(Maxpressure),
+         Hours = as.numeric(Hours),
+         Total.Pop = as.numeric(Total.Pop))
+
+Coef_table = data_res %>% 
+  select(id, intercept, beta1, beta2, beta3, beta4) %>% 
+  head(10) %>% 
+  knitr::kable()
+
+Coef_table
+```
+
+Fortunately, 43 hurricanes recorded in $hurricanoutcome2.csv$ are also in $hurrican703.csv$. Thus, we merge two data frame by hurricane id to predict the deaths and damage caused by hurricanes.
+
+The death variable is a count variable, so we decided to use Poisson regression to analysis relationship between death and other variables excluding damage. We use `Total.Pop` and `Hours` as the offset, since the outcome of deaths is proportional and the results would be different in some dimension (different populations, different duration). The Poisson regression is:
+
+\begin{center}
+$log(E(Deaths)) = \beta_{i}X_{i} + offset$
+\end{center}
+
+Where $X_{i}$ indicates all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients result is in Table 99.
+\begin{center}
+Table 99. Coefficients of Deaths Prediction
+\end{center}
+```{r, echo=FALSE}
+data_deaths = data_res %>% 
+  select(-c(id, Damage))
+offset_pop = data_deaths %>% pull(Total.Pop)
+offset_dur = data_deaths %>% pull(Hours)
+deaths.fit = glm(Deaths ~ . + offset(log(offset_pop)) + offset(log(offset_dur)), data = data_deaths %>% select(-c(Total.Pop, Hours)), family = "poisson")
+deaths.tidy = summary(deaths.fit) %>% na.omit()
+knitr::kable(deaths.tidy$coefficients)
+```
+
+From the results, $\beta_{0}  \sim  \beta_{4}$ indicate the relatively strong association. Especially, $\beta_{1}$, which represents the earlier wind speed has the biggest coefficient. We could conclude that high wind speed of hurricane more easily leads to serious casualties. Also, months seem to be an important factor in prediction. Comparing to June and September, July, November and October have lower proportion of death given all other variables constant. 
+
+In order to obtain the integer data, we transform the units of `Damage` from billion to million. Thus, `Damage` could be regarded as a count variable which could also be fitted by Poisson regression. In order to adjust the exposure, we use `Hours` as the offset.
+
+\begin{center}
+$log(E(Damage*1000)) = \beta_{i}X_{i} + offset$
+\end{center}
+
+Where $X_{i}$ presents all predictors included in the model. We use `glm` function to achieve the Poisson model. The coefficients results is in Table 99.
+
+```{r, echo=FALSE, message=FALSE, include=FALSE}
+df_total = data.frame()
+coef_res = function(table){
+  for (i in 1:22) {
+    df = table[i,]
+    if(table[i,5]<0.05){df_total = rbind(df_total, df) 
+    i = i + 1}
+    else{i = i +1}
+  }
+  print(df_total)
+}
+```
+
+```{r, echo=FALSE, message=FALSE}
+data_damage = data_res %>% 
+  select(-c(id, Deaths)) %>% 
+  mutate(Damage = 1000*Damage)
+
+offset_dur_damage = data_deaths %>% pull(Hours)
+require(broom)
+damage.fit = glm(Damage ~.+ offset(log(offset_dur_damage)), data = data_damage %>% select(-Hours), family = "poisson"(link = "log"))
+damage.tidy = tidy(damage.fit)
+
+
+
+table6 = knitr::kable(damage.tidy)
+table6
+```
+
+The results of coefficients in predicting damage also show the importance of $\beta_{1}$. From the model, we can see that serious casualties are also accompanied by serious financial losses which are strongly influenced by earlier wind speed and are slightly affected by months, latitude change, longitude change and wind speed change. $\beta_{0}  \sim  \beta_{4}$ are generally powerful in damage and deaths prediction.
