@@ -315,12 +315,12 @@ knitr::include_graphics("./q4_prediction_plot.png")
 ```
 
 # Seasonal Difference Exploration
-```{r p5_sum, echo=FALSE}
+```{r p5_sum, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./p5_sum.jpg")
 ```
 
 # Seasonal Difference Exploration
-```{r p5_sum_new, echo=FALSE}
+```{r p5_sum_new, echo=FALSE, out.width = '80%', fig.align='center'}
 knitr::include_graphics("./p5_sum2.jpg")
 knitr::include_graphics("./p5_sum_new.jpg")
 ```
