@@ -176,6 +176,29 @@ dt_long %>%
 Figure 6. Average Speed (knot) of Hurricanes in Each Nature
 \end{center}
 
+## Model Performance
+
+We evaluate the performance of predictive ability by calculating the RMSE and the $R^2$ values for each hurricane. The residuals of Bayesian estimates that converged after iterations from MCMC will be used to predict the wind speed of test dataset.
+The overall $R^2$ is 0.822 and overall RMSE is 4.51. The valid $R^2$ is filtered with values between 0 and 1 and we get 77.5% hurriacanes (540) indicating that 22.5% of the estimated Bayesian models do not track hurricanes well and have negative $R^2$. One of the reason may be the limited number of observations of the hurricanes.
+Figure 7 shows the 10 hurriances with the least 10 RMSE. $R^2$ are also large enough to indicates that the estimated model track most hurricanes well and the smallest RMSE is GUSTAV.1996 with $R^2$ being 0.952. 
+
+```{r predict, echo=FALSE}
+load("./tables/dt_rmse.RData")
+dt_rmse %>% head(10) %>% knitr::kable(digits = 3)
+```
+\begin{center}
+Figure 7. R-square and RMSE for prediction result on test data
+\end{center}
+
+Figure 8 shows the actual wind speed and the estimated wind speed of randomly selected four hurricanes . We can see that most parts of the two curves overlapped indicating that the predicted values are close to the actual values. In DEBBY.2006, we can see that this is a very good model prediction with small deviation. 
+
+
+```{r performance, echo=FALSE, out.width = '90%', fig.align='center'}
+knitr::include_graphics("./q4_prediction_plot.png")
+```
+\begin{center}
+Figure 8. Actual Wind Speed vs. Predicted Wind Speed
+\end{center}
 
 
 ```{r, include=FALSE}
@@ -186,6 +209,8 @@ library(caret)
 library(corrplot)
 library(plotmo)
 ```
+
+
 
 ## Predict the hurricane-induced damage and deaths
 Firstly, we plot deaths and financial loss separately. Figure 99. shows the distributions of deaths and damage. We could easily find that a few points which are far away from most of points indicate serious damage of society. In predictions of disasters, these extreme points are important because they enables the model the ability to predict the worst outcome. Therefore, we keep these points in model building.
@@ -329,3 +354,37 @@ table6
 ```
 
 The results of coefficients in predicting damage also show the importance of $\beta_{1}$. From the model, we can see that serious casualties are also accompanied by serious financial losses which are strongly influenced by earlier wind speed and are slightly affected by months, latitude change, longitude change and wind speed change. $\beta_{0}  \sim  \beta_{4}$ are generally powerful in damage and deaths prediction.
+
+
+# Appendix
+
+## Model Performance
+```{r,eval=FALSE,echo=TRUE}
+beta.res.postmean = beta.res.postmean %>% rename(beta_0 = intercept, 
+                                                 beta_1 = Wind_prev, 
+                                                 beta_2 = Lat_change,  
+                                                 beta_3 = Long_change, 
+                                                 beta_4 = Wind_change)
+
+dt_res = merge(dt_test_id, beta.res.postmean, by = "ID")
+
+dt_res = dt_res %>% 
+  mutate(Wind_kt_pred = beta_0*intercept+beta_1*Wind_prev
+         +beta_2*Lat_change+beta_3*Long_change+beta_4*Wind_change) %>%
+  group_by(ID) %>% 
+  mutate(r_square = 1-(sum((Wind_kt_pred-Wind.kt)^2))/(sum((Wind.kt-mean(Wind.kt))^2)),
+         rmse = rmse(Wind.kt,Wind_kt_pred))
+```
+
+```{r,eval=FALSE,echo=TRUE}
+  dt_rmse=
+  dt_res %>% 
+  dplyr::select(ID, r_square, rmse) %>% 
+  distinct() %>% 
+  mutate(r_square = round(r_square, 3),
+         rmse = round(rmse,3)) %>% 
+  filter(r_square > 0 && r_square < 1) %>% 
+  arrange(rmse)
+mean(dt_rmse$r_square)
+mean(dt_rmse$rmse)
+```
