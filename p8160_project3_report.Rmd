@@ -1103,6 +1103,47 @@ kable(cbind(sum0.new, sum1.new, sum2.new, sum3.new, sum4.new)) %>%
   add_header_above(c(" " = 1, "Beta 0" = 2, "Beta 1" = 2, "Beta 2" = 2, "Beta 3" = 2, "Beta 4" = 2))
 ```
 
+### Damage and Death
+
+```{r, echo=TRUE, eval = F}
+data_deaths = data_res %>% 
+  select(-c(id, Damage))
+offset_pop = data_deaths %>% pull(Total.Pop)
+offset_dur = data_deaths %>% pull(Hours)
+deaths.fit = glm(Deaths ~ . + offset(log(offset_pop)) + offset(log(offset_dur)), data = data_deaths %>% select(-c(Total.Pop, Hours)), family = "poisson")
+deaths.tidy = summary(deaths.fit) %>% na.omit()
+knitr::kable(deaths.tidy$coefficients, digits = 3)
+```
+
+```{r, echo=T, message=FALSE, include=FALSE, eval = F}
+df_total = data.frame()
+coef_res = function(table){
+  for (i in 1:22) {
+    df = table[i,]
+    if(table[i,5]<0.05){df_total = rbind(df_total, df) 
+    i = i + 1}
+    else{i = i +1}
+  }
+  print(df_total)
+}
+```
+
+```{r, echo=T, eval=F, message=FALSE}
+data_damage = data_res %>% 
+  select(-c(id, Deaths)) %>% 
+  mutate(Damage = 1000*Damage)
+
+offset_dur_damage = data_deaths %>% pull(Hours)
+require(broom)
+damage.fit = glm(Damage ~.+ offset(log(offset_dur_damage)), data = data_damage %>% select(-Hours), family = "poisson"(link = "log"))
+damage.tidy = tidy(damage.fit)
+
+
+
+table6 = knitr::kable(damage.tidy, digits = 3)
+table6
+```
+
 ### Bad inital value
 
 ```{r bad_init_trace, echo=FALSE, out.width = '90%', fig.align='center'}
